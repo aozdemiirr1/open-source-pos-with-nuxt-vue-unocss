@@ -9,7 +9,16 @@ const orderTypes = [
   { id: 'online', label: 'Online', icon: 'mdi:truck-delivery' }
 ]
 
+const orderStatuses = [
+  { id: 'all', label: 'Tüm Durumlar', icon: 'mdi:filter-variant' },
+  { id: 'pending', label: 'Bekliyor', icon: 'mdi:clock-outline' },
+  { id: 'preparing', label: 'Hazırlanıyor', icon: 'mdi:progress-clock' },
+  { id: 'ready', label: 'Hazır', icon: 'mdi:check-circle-outline' },
+  { id: 'completed', label: 'Tamamlandı', icon: 'mdi:check-circle' }
+]
+
 const activeOrderType = ref('all')
+const activeStatus = ref('all')
 const selectedOrder = ref(null)
 const searchQuery = ref('')
 
@@ -62,6 +71,11 @@ const filteredOrders = computed(() => {
   // Filter by order type
   if (activeOrderType.value !== 'all') {
     filtered = filtered.filter(order => order.type === activeOrderType.value)
+  }
+
+  // Filter by status
+  if (activeStatus.value !== 'all') {
+    filtered = filtered.filter(order => order.status === activeStatus.value)
   }
 
   return filtered
@@ -195,6 +209,21 @@ const formatDate = (date) => {
         </select>
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Icon :name="orderTypes.find(t => t.id === activeOrderType)?.icon" class="text-lg text-gray-400" />
+        </div>
+        <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+          <Icon name="mdi:chevron-down" class="text-gray-400" />
+        </div>
+      </div>
+
+      <!-- Status Filters -->
+      <div class="relative">
+        <select v-model="activeStatus" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option v-for="status in orderStatuses" :key="status.id" :value="status.id">
+            {{ status.label }}
+          </option>
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon :name="orderStatuses.find(s => s.id === activeStatus)?.icon" class="text-lg text-gray-400" />
         </div>
         <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
           <Icon name="mdi:chevron-down" class="text-gray-400" />
