@@ -2,7 +2,12 @@
 import { ref, computed } from 'vue'
 import { faker } from '@faker-js/faker'
 
-const customerTypes = ['masa', 'gel-al', 'online']
+const customerTypes = [
+  { id: 'all', label: 'Tümü', icon: 'mdi:clipboard-list' },
+  { id: 'masa', label: 'Masa', icon: 'mdi:table-chair' },
+  { id: 'gel-al', label: 'Gel-Al', icon: 'mdi:shopping' },
+  { id: 'online', label: 'Online', icon: 'mdi:truck-delivery' }
+]
 
 // Generate fake customers
 const generateCustomers = () => {
@@ -10,7 +15,7 @@ const generateCustomers = () => {
         id: faker.string.uuid(),
         name: faker.person.fullName(),
         phone: faker.phone.number(),
-        type: customerTypes[Math.floor(Math.random() * customerTypes.length)],
+        type: customerTypes.slice(1).map(t => t.id)[Math.floor(Math.random() * 3)],
         city: faker.location.city(),
         district: faker.location.county(),
         neighborhood: faker.location.street(),
@@ -32,6 +37,10 @@ const selectedCustomerOrders = ref([])
 const currentPage = ref(1)
 const itemsPerPage = 10
 
+const activeCustomerType = ref('all')
+const selectedCity = ref('all')
+const selectedDistrict = ref('all')
+
 const newCustomer = ref({
     id: '',
     name: '',
@@ -42,6 +51,30 @@ const newCustomer = ref({
     neighborhood: '',
     street: '',
     orders: []
+})
+
+// Get unique cities and districts
+const availableCities = computed(() => {
+    const cities = ['all', ...new Set(customers.value.map(c => c.city))]
+    return cities.map(city => ({
+        id: city,
+        label: city === 'all' ? 'Tüm İller' : city
+    }))
+})
+
+const availableDistricts = computed(() => {
+    let districts = ['all']
+    if (selectedCity.value === 'all') {
+        districts = [...new Set(customers.value.map(c => c.district))]
+    } else {
+        districts = [...new Set(customers.value
+            .filter(c => c.city === selectedCity.value)
+            .map(c => c.district))]
+    }
+    return districts.map(district => ({
+        id: district,
+        label: district === 'all' ? 'Tüm İlçeler' : district
+    }))
 })
 
 // Filtered customers
@@ -57,6 +90,21 @@ const filteredCustomers = computed(() => {
             customer.district.toLowerCase().includes(query) ||
             customer.neighborhood.toLowerCase().includes(query)
         )
+    }
+
+    // Filter by customer type
+    if (activeCustomerType.value !== 'all') {
+        result = result.filter(customer => customer.type === activeCustomerType.value)
+    }
+
+    // Filter by city
+    if (selectedCity.value !== 'all') {
+        result = result.filter(customer => customer.city === selectedCity.value)
+    }
+
+    // Filter by district
+    if (selectedDistrict.value !== 'all') {
+        result = result.filter(customer => customer.district === selectedDistrict.value)
     }
 
     return result
@@ -172,7 +220,7 @@ const getCustomerTypeLabel = (type) => {
             </button>
         </div>
 
-        <!-- Search -->
+        <!-- Filters -->
         <div class="flex items-center mb-6 gap-4">
             <div class="relative flex-1 max-w-md">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -180,6 +228,52 @@ const getCustomerTypeLabel = (type) => {
                 </div>
                 <input v-model="searchQuery" type="text" placeholder="Müşteri ara..."
                     class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
+            <!-- Customer Type Filter -->
+            <div class="relative">
+                <select v-model="activeCustomerType" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option v-for="type in customerTypes" :key="type.id" :value="type.id">
+                        {{ type.label }}
+                    </option>
+                </select>
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Icon :name="customerTypes.find(t => t.id === activeCustomerType)?.icon" class="text-lg text-gray-400" />
+                </div>
+                <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                    <Icon name="mdi:chevron-down" class="text-gray-400" />
+                </div>
+            </div>
+
+            <!-- City Filter -->
+            <div class="relative">
+                <select v-model="selectedCity" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option v-for="city in availableCities" :key="city.id" :value="city.id">
+                        {{ city.label }}
+                    </option>
+                </select>
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Icon name="mdi:city" class="text-lg text-gray-400" />
+                </div>
+                <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                    <Icon name="mdi:chevron-down" class="text-gray-400" />
+                </div>
+            </div>
+
+            <!-- District Filter -->
+            <div class="relative">
+                <select v-model="selectedDistrict" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="all">Tüm İlçeler</option>
+                    <option v-for="district in availableDistricts" :key="district.id" :value="district.id">
+                        {{ district.label }}
+                    </option>
+                </select>
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Icon name="mdi:city-variant" class="text-lg text-gray-400" />
+                </div>
+                <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                    <Icon name="mdi:chevron-down" class="text-gray-400" />
+                </div>
             </div>
         </div>
 
