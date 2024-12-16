@@ -86,6 +86,8 @@ const selectedExtras = ref({
 const selectedIngredients = ref([])
 const orderNotes = ref('')
 const cart = ref([])
+const showReceipt = ref(false)
+const currentOrder = ref(null)
 
 // Sipariş Bilgileri
 const orderType = ref('')
@@ -199,10 +201,17 @@ const completeOrder = () => {
         items: [...cart.value],
         total: cartTotal.value,
         status: 'pending',
-        date: new Date()
+        date: new Date(),
+        orderDetails: cart.value[0] // Sipariş detaylarını al
     }
+    
+    currentOrder.value = order
+    showReceipt.value = true
+}
 
-    console.log('Sipariş oluşturuldu:', order)
+const closeReceipt = () => {
+    showReceipt.value = false
+    currentOrder.value = null
     cart.value = []
 }
 </script>
@@ -222,7 +231,7 @@ const completeOrder = () => {
         <div class="flex flex-1 gap-6 p-6 pt-0 overflow-hidden">
             <!-- Sol Panel: Sepet -->
             <div class="w-1/3">
-                <div class="bg-white rounded-lg shadow-sm p-4 h-full overflow-auto">
+                <div class="bg-white rounded shadow-sm p-4 h-full overflow-auto">
                     <h3 class="text-lg font-semibold mb-4">Sepet</h3>
 
                     <div v-if="cart.length === 0" class="text-center py-8 text-gray-500">
@@ -235,15 +244,16 @@ const completeOrder = () => {
                                 <div>
                                     <h4 class="font-medium">{{ item.name }}</h4>
                                     <p class="text-sm text-gray-600">
-                                        {{ item.orderType === 'masa' ? `Masa: ${item.tableNumber}` : 
-                                           item.orderType === 'gelal' ? `Müşteri: ${item.customerName}` :
-                                           `Online - ${item.customerName}` }}
+                                        {{ item.orderType === 'masa' ? `Masa: ${item.tableNumber}` :
+                                            item.orderType === 'gelal' ? `Müşteri: ${item.customerName}` :
+                                                `Online - ${item.customerName}` }}
                                     </p>
                                     <p v-if="item.extras.drink" class="text-sm text-gray-600">
                                         İçecek: {{ drinks.find(d => d.id === item.extras.drink)?.name }}
                                     </p>
                                     <p v-if="item.extras.sauces.length" class="text-sm text-gray-600">
-                                        Soslar: {{ item.extras.sauces.map(s => sauces.find(sauce => sauce.id === s)?.name).join(', ') }}
+                                        Soslar: {{ item.extras.sauces.map(s => sauces.find(sauce => sauce.id ===
+                                        s)?.name).join(', ') }}
                                     </p>
                                     <p v-if="item.notes" class="text-sm text-gray-500 italic">
                                         Not: {{ item.notes }}
@@ -269,8 +279,7 @@ const completeOrder = () => {
                             </div>
                         </div>
 
-                        <button @click="completeOrder"
-                            class="w-full px-4 py-2 bg-green-500 text-white rounded-lg">
+                        <button @click="completeOrder" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg">
                             Siparişi Tamamla
                         </button>
                     </div>
@@ -282,8 +291,7 @@ const completeOrder = () => {
                 <!-- Menü Kategorileri -->
                 <div class="mb-4">
                     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                        <div v-for="category in menuCategories" :key="category.id" 
-                            @click="activeCategory = category.id"
+                        <div v-for="category in menuCategories" :key="category.id" @click="activeCategory = category.id"
                             :class="[
                                 'px-3 py-1.5 text-sm rounded-lg whitespace-nowrap cursor-pointer transition-colors',
                                 activeCategory === category.id
@@ -297,23 +305,20 @@ const completeOrder = () => {
 
                 <!-- Ürünler Grid -->
                 <div class="overflow-auto">
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-3 gap-6">
                         <div v-for="product in filteredProducts" :key="product.id"
-                            class="bg-white rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1"
+                            class="bg-white rounded shadow-sm p-6 cursor-pointer transition-all transform"
                             @click="showProductModal(product)">
                             <div class="mb-4">
                                 <h3 class="text-lg font-semibold">{{ product.name }}</h3>
-                                <p class="text-gray-600 mt-1">{{ product.description }}</p>
-                                <div class="flex flex-wrap items-center gap-2 mt-2">
-                                    <span v-for="ing in product.ingredients" :key="ing"
-                                        class="text-xs bg-gray-100 px-2 py-1 rounded-full">
-                                        {{ ing }}
-                                    </span>
-                                </div>
+                                <p class="text-gray-600 text-xs mt-1">{{ product.description }}</p>
+                                
                             </div>
                             <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-blue-600">₺{{ product.price }}</span>
-                                <div class="text-sm text-blue-500">Seçenekleri Gör →</div>
+                                <span class="text-md  text-gray-600">₺{{ product.price }}</span>
+                                <button class="text-sm  text-blue-500 flex items-center">
+                                    <Icon name="mdi:cart-plus" class="text-lg" /> <span class="ml-1">Sepete Ekle</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -336,7 +341,8 @@ const completeOrder = () => {
                     <div>
                         <h4 class="font-medium mb-2">Sipariş Tipi</h4>
                         <div class="relative">
-                            <select v-model="orderType" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <select v-model="orderType"
+                                class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Seçiniz</option>
                                 <option value="masa">Masa</option>
                                 <option value="gelal">Gel-Al</option>
@@ -370,7 +376,8 @@ const completeOrder = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Adres</label>
-                                <textarea v-model="customerAddress" class="w-full p-2 border rounded-lg" rows="2"></textarea>
+                                <textarea v-model="customerAddress" class="w-full p-2 border rounded-lg"
+                                    rows="2"></textarea>
                             </div>
                         </template>
                     </div>
@@ -379,7 +386,8 @@ const completeOrder = () => {
                     <div v-if="selectedProduct.hasDrinkOption">
                         <h4 class="font-medium mb-2">İçecek Seçimi</h4>
                         <div class="relative">
-                            <select v-model="selectedExtras.drink" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <select v-model="selectedExtras.drink"
+                                class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">İçecek Seçiniz</option>
                                 <option v-for="drink in drinks" :key="drink.id" :value="drink.id">
                                     {{ drink.name }} (+₺{{ drink.price }})
@@ -398,16 +406,14 @@ const completeOrder = () => {
                     <div v-if="selectedProduct.hasSauceOption">
                         <h4 class="font-medium mb-2">Sos Seçimi</h4>
                         <div class="flex flex-wrap gap-2">
-                            <div v-for="sauce in sauces" :key="sauce.id" 
-                                @click="selectedExtras.sauces.includes(sauce.id) ? 
-                                    selectedExtras.sauces = selectedExtras.sauces.filter(id => id !== sauce.id) : 
-                                    selectedExtras.sauces.push(sauce.id)"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg cursor-pointer border transition-colors',
-                                    selectedExtras.sauces.includes(sauce.id)
-                                        ? 'bg-blue-50 border-blue-500 text-blue-700'
-                                        : 'border-gray-300 hover:border-blue-500'
-                                ]">
+                            <div v-for="sauce in sauces" :key="sauce.id" @click="selectedExtras.sauces.includes(sauce.id) ?
+                                selectedExtras.sauces = selectedExtras.sauces.filter(id => id !== sauce.id) :
+                                selectedExtras.sauces.push(sauce.id)" :class="[
+                                        'px-3 py-1.5 rounded cursor-pointer border text-xs transition-colors',
+                                        selectedExtras.sauces.includes(sauce.id)
+                                            ? 'bg-green-50 border-green-500 text-green-700'
+                                            : 'border-gray-300 hover:border-green-500'
+                                    ]">
                                 {{ sauce.name }} (+₺{{ sauce.price }})
                             </div>
                         </div>
@@ -417,16 +423,14 @@ const completeOrder = () => {
                     <div v-if="selectedProduct.ingredients?.length">
                         <h4 class="font-medium mb-2">Malzemeler</h4>
                         <div class="flex flex-wrap gap-2">
-                            <div v-for="ing in selectedProduct.ingredients" :key="ing"
-                                @click="selectedIngredients.includes(ing) ? 
-                                    selectedIngredients = selectedIngredients.filter(i => i !== ing) : 
-                                    selectedIngredients.push(ing)"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg cursor-pointer border transition-colors',
-                                    selectedIngredients.includes(ing)
-                                        ? 'bg-green-50 border-green-500 text-green-700'
-                                        : 'bg-red-50 border-red-500 text-red-700'
-                                ]">
+                            <div v-for="ing in selectedProduct.ingredients" :key="ing" @click="selectedIngredients.includes(ing) ?
+                                selectedIngredients = selectedIngredients.filter(i => i !== ing) :
+                                selectedIngredients.push(ing)" :class="[
+                                        'px-3 py-1.5 rounded text-xs cursor-pointer border transition-colors',
+                                        selectedIngredients.includes(ing)
+                                            ? 'bg-green-50 border-green-500 text-green-700'
+                                            : 'bg-red-50 border-red-500 text-red-700'
+                                    ]">
                                 {{ ing }}
                             </div>
                         </div>
@@ -447,6 +451,78 @@ const completeOrder = () => {
                             Sepete Ekle
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fiş Modal -->
+        <div v-if="showReceipt" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg w-[400px] p-6">
+                <div class="text-center border-b pb-4 mb-4">
+                    <h3 class="text-xl font-bold">Sipariş Fişi</h3>
+                    <p class="text-gray-500 text-sm">{{ new Date(currentOrder.date).toLocaleString() }}</p>
+                    <p class="text-gray-500 text-sm">Sipariş No: #{{ currentOrder.id }}</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Müşteri Bilgileri -->
+                    <div class="border-b pb-4">
+                        <h4 class="font-medium mb-2">Sipariş Bilgileri</h4>
+                        <p class="text-sm">
+                            <span class="font-medium">Sipariş Tipi:</span>
+                            {{ currentOrder.orderDetails.orderType === 'masa' ? 'Masa' :
+                                currentOrder.orderDetails.orderType === 'gelal' ? 'Gel-Al' : 'Online' }}
+                        </p>
+                        <template v-if="currentOrder.orderDetails.orderType === 'masa'">
+                            <p class="text-sm">
+                                <span class="font-medium">Masa No:</span> {{ currentOrder.orderDetails.tableNumber }}
+                            </p>
+                        </template>
+                        <template v-else>
+                            <p class="text-sm">
+                                <span class="font-medium">Müşteri:</span> {{ currentOrder.orderDetails.customerName }}
+                            </p>
+                            <template v-if="currentOrder.orderDetails.orderType === 'online'">
+                                <p class="text-sm">
+                                    <span class="font-medium">Telefon:</span> {{ currentOrder.orderDetails.customerPhone }}
+                                </p>
+                                <p class="text-sm">
+                                    <span class="font-medium">Adres:</span> {{ currentOrder.orderDetails.customerAddress }}
+                                </p>
+                            </template>
+                        </template>
+                    </div>
+
+                    <!-- Ürünler -->
+                    <div class="space-y-3">
+                        <div v-for="item in currentOrder.items" :key="item.id" class="text-sm">
+                            <div class="flex justify-between">
+                                <span>{{ item.name }} x{{ item.quantity }}</span>
+                                <span>₺{{ calculateItemTotal(item) }}</span>
+                            </div>
+                            <div v-if="item.extras.drink" class="text-gray-600 ml-4">
+                                + {{ drinks.find(d => d.id === item.extras.drink)?.name }}
+                            </div>
+                            <div v-if="item.extras.sauces.length" class="text-gray-600 ml-4">
+                                + {{ item.extras.sauces.map(s => sauces.find(sauce => sauce.id === s)?.name).join(', ') }}
+                            </div>
+                            <div v-if="item.notes" class="text-gray-500 italic ml-4">
+                                Not: {{ item.notes }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toplam -->
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between font-bold">
+                            <span>Toplam</span>
+                            <span>₺{{ currentOrder.total }}</span>
+                        </div>
+                    </div>
+
+                    <button @click="closeReceipt" class="w-full px-4 py-2 bg-green-500 text-white rounded-lg mt-4">
+                        Tamam
+                    </button>
                 </div>
             </div>
         </div>
