@@ -71,29 +71,11 @@ const menuItems = [
         path: '/customers'
     },
     {
-        id: 6,
-        label: 'Ürünler',
-        icon: 'mdi:package-variant',
-        path: '/products'
-    },
-    {
-        id: 7,
-        label: 'Kategoriler',
-        icon: 'mdi:shape',
-        path: '/categories'
-    },
-    {
         id: 8,
         title: 'System',
         label: 'Ayarlar',
         icon: 'mdi:cog',
         path: '/settings'
-    },
-    {
-        id: 9,
-        label: 'Raporlar',
-        icon: 'mdi:chart-box',
-        path: '/reports'
     }
 ]
 </script>
