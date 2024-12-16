@@ -45,7 +45,8 @@ const saveSettings = () => {
             </div>
             <div>
                 <button @click="saveSettings"
-                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-blue-500">
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 flex items-center gap-2">
+                    <Icon name="mdi:content-save" />
                     Ayarları Kaydet
                 </button>
             </div>
