@@ -19,10 +19,46 @@ const activeCustomerType = ref('all')
 const activeStatus = ref('all')
 const selectedCustomer = ref(null)
 const searchQuery = ref('')
+const cityFilter = ref('Tümü')
+const districtFilter = ref('Tümü')
+const neighborhoodFilter = ref('Tümü')
+const streetFilter = ref('Tümü')
 const orders = ref([])
 const showAddCustomerModal = ref(false)
 const showEditCustomerModal = ref(false)
 const editingCustomer = ref(null)
+
+const cities = computed(() => {
+  const uniqueCities = [...new Set(customers.value.map(c => c.city).filter(Boolean))]
+  return ['Tümü', ...uniqueCities]
+})
+
+const districts = computed(() => {
+  const uniqueDistricts = [...new Set(customers.value
+    .filter(c => !cityFilter.value || cityFilter.value === 'Tümü' || c.city === cityFilter.value)
+    .map(c => c.district)
+    .filter(Boolean))]
+  return ['Tümü', ...uniqueDistricts]
+})
+
+const neighborhoods = computed(() => {
+  const uniqueNeighborhoods = [...new Set(customers.value
+    .filter(c => (!cityFilter.value || cityFilter.value === 'Tümü' || c.city === cityFilter.value) &&
+                 (!districtFilter.value || districtFilter.value === 'Tümü' || c.district === districtFilter.value))
+    .map(c => c.neighborhood)
+    .filter(Boolean))]
+  return ['Tümü', ...uniqueNeighborhoods]
+})
+
+const streets = computed(() => {
+  const uniqueStreets = [...new Set(customers.value
+    .filter(c => (!cityFilter.value || cityFilter.value === 'Tümü' || c.city === cityFilter.value) &&
+                 (!districtFilter.value || districtFilter.value === 'Tümü' || c.district === districtFilter.value) &&
+                 (!neighborhoodFilter.value || neighborhoodFilter.value === 'Tümü' || c.neighborhood === neighborhoodFilter.value))
+    .map(c => c.street)
+    .filter(Boolean))]
+  return ['Tümü', ...uniqueStreets]
+})
 
 const newCustomer = ref({
   name: '',
@@ -82,7 +118,9 @@ const filteredCustomers = computed(() => {
     filtered = filtered.filter(customer =>
       customer.name.toLowerCase().includes(query) ||
       customer.city?.toLowerCase().includes(query) ||
-      customer.district?.toLowerCase().includes(query)
+      customer.district?.toLowerCase().includes(query) ||
+      customer.neighborhood?.toLowerCase().includes(query) ||
+      customer.street?.toLowerCase().includes(query)
     )
   }
 
@@ -92,6 +130,22 @@ const filteredCustomers = computed(() => {
 
   if (activeStatus.value !== 'all') {
     filtered = filtered.filter(customer => customer.status === activeStatus.value)
+  }
+
+  if (cityFilter.value && cityFilter.value !== 'Tümü') {
+    filtered = filtered.filter(customer => customer.city === cityFilter.value)
+  }
+
+  if (districtFilter.value && districtFilter.value !== 'Tümü') {
+    filtered = filtered.filter(customer => customer.district === districtFilter.value)
+  }
+
+  if (neighborhoodFilter.value && neighborhoodFilter.value !== 'Tümü') {
+    filtered = filtered.filter(customer => customer.neighborhood === neighborhoodFilter.value)
+  }
+
+  if (streetFilter.value && streetFilter.value !== 'Tümü') {
+    filtered = filtered.filter(customer => customer.street === streetFilter.value)
   }
 
   return filtered
@@ -220,8 +274,8 @@ const formatDate = (date) => {
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-4 mb-6">
-      <div class="relative flex-1">
+    <div class="flex flex-wrap gap-3 mb-6">
+      <div class="relative w-64">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Icon name="mdi:magnify" class="h-5 w-5 text-gray-400" />
         </div>
@@ -231,7 +285,7 @@ const formatDate = (date) => {
 
       <div class="relative">
         <select v-model="activeCustomerType"
-          class="w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+          class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
           <option v-for="type in customerTypes" :key="type.id" :value="type.id">
             {{ type.label }}
           </option>
@@ -242,13 +296,57 @@ const formatDate = (date) => {
       </div>
 
       <div class="relative">
-        <select v-model="activeStatus" class="w-48 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+        <select v-model="activeStatus" class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
           <option v-for="status in customerStatuses" :key="status.id" :value="status.id">
             {{ status.label }}
           </option>
         </select>
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Icon :name="customerStatuses.find(s => s.id === activeStatus)?.icon" class="text-gray-400" />
+        </div>
+      </div>
+
+      <div class="relative">
+        <select v-model="cityFilter" class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+          <option v-for="city in cities" :key="city" :value="city">
+            {{ city }}
+          </option>
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon name="mdi:city" class="text-gray-400" />
+        </div>
+      </div>
+
+      <div class="relative">
+        <select v-model="districtFilter" class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+          <option v-for="district in districts" :key="district" :value="district">
+            {{ district }}
+          </option>
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon name="mdi:map-marker" class="text-gray-400" />
+        </div>
+      </div>
+
+      <div class="relative">
+        <select v-model="neighborhoodFilter" class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+          <option v-for="neighborhood in neighborhoods" :key="neighborhood" :value="neighborhood">
+            {{ neighborhood }}
+          </option>
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon name="mdi:home-city" class="text-gray-400" />
+        </div>
+      </div>
+
+      <div class="relative">
+        <select v-model="streetFilter" class="w-40 pl-10 pr-4 py-2 border border-gray-300 rounded-lg appearance-none">
+          <option v-for="street in streets" :key="street" :value="street">
+            {{ street }}
+          </option>
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon name="mdi:road" class="text-gray-400" />
         </div>
       </div>
     </div>
