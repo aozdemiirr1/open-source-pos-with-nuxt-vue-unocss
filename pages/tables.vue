@@ -1,13 +1,12 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import axios from '../composables/data/axios'
 
-const menuItems = [
-    { id: 1, name: 'Karışık Pizza', price: 120 },
-    { id: 2, name: 'Hamburger', price: 85 },
-    { id: 3, name: 'Cola', price: 15 },
-    { id: 4, name: 'Patates Kızartması', price: 30 },
-    { id: 5, name: 'Tavuk Döner', price: 70 }
-]
+const activeStatus = ref('all')
+const selectedTable = ref(null)
+const searchQuery = ref('')
+const tables = ref([])
+const orders = ref([])
 
 const tableStatuses = [
     { id: 'all', label: 'Tümü', icon: 'mdi:table-furniture' },
@@ -15,53 +14,24 @@ const tableStatuses = [
     { id: 'empty', label: 'Boş', icon: 'mdi:table' }
 ]
 
-const activeStatus = ref('all')
-const selectedTable = ref(null)
-const searchQuery = ref('')
-
-// Mock orders data from orders.vue
-const mockOrders = [
-  {
-    id: '100001',
-    customer: 'Ahmet Yılmaz',
-    type: 'masa',
-    tableNo: '5',
-    total: 235,
-    status: 'pending',
-    date: new Date('2024-01-15T12:30:00'),
-    items: [
-      { id: '1001', name: 'Karışık Pizza', quantity: 1, price: 120 },
-      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
-      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
-    ]
-  },
-  {
-    id: '100015', 
-    customer: 'Abdullah Özdemir',
-    type: 'masa',
-    tableNo: '10',
-    total: 155,
-    status: 'ready',
-    date: new Date('2024-01-15T13:45:00'),
-    items: [
-      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
-      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
-      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
-    ]
-  }
-]
-
-const orders = ref(mockOrders)
-const tables = ref([])
+// Fetch orders and update tables when component mounts
+onMounted(async () => {
+    try {
+        const response = await axios.get('/orders')
+        orders.value = response.data
+        updateTables()
+    } catch (error) {
+        console.error('Error fetching orders:', error)
+    }
+})
 
 // Watch orders for changes and update tables
-watch(() => orders.value, (newOrders) => {
+watch(() => orders.value, () => {
     updateTables()
 }, { deep: true })
 
 // Create tables and add orders
 const updateTables = () => {
-    // Create 12 tables
     tables.value = Array.from({ length: 12 }, (_, index) => {
         const tableNo = (index + 1).toString()
         
@@ -84,7 +54,6 @@ const updateTables = () => {
             }
         }
 
-        // If table is empty
         return {
             id: `table-${index + 1}`,
             number: index + 1,
@@ -100,21 +69,16 @@ const updateTables = () => {
 const filteredTables = computed(() => {
     let filtered = tables.value
 
-    // Status filter
     if (activeStatus.value !== 'all') {
         filtered = filtered.filter(table => table.status === activeStatus.value)
     }
 
-    // Search filter
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
-        filtered = filtered.filter(table => {
-            return (
-                table.number.toString().includes(query) ||
-                `masa ${table.number}`.toLowerCase().includes(query) ||
-                (table.customer && table.customer.toLowerCase().includes(query))
-            )
-        })
+        filtered = filtered.filter(table => 
+            table.number.toString().includes(query) ||
+            (table.customer && table.customer.toLowerCase().includes(query))
+        )
     }
 
     return filtered
@@ -197,9 +161,6 @@ const printTableReceipt = (table) => {
     printWindow.document.close()
     printWindow.print()
 }
-
-// Initialize tables on load
-updateTables()
 </script>
 
 <template>

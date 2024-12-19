@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import axios from '../composables/data/axios'
 
 const orderTypes = [
   { id: 'all', label: 'Tümü', icon: 'mdi:clipboard-list' },
   { id: 'masa', label: 'Masa', icon: 'mdi:table-chair' },
-  { id: 'gelal', label: 'Gel-Al', icon: 'mdi:shopping' },
+  { id: 'gel-al', label: 'Gel-Al', icon: 'mdi:shopping' },
   { id: 'online', label: 'Online', icon: 'mdi:truck-delivery' }
 ]
 
@@ -20,108 +21,33 @@ const activeOrderType = ref('all')
 const activeStatus = ref('all')
 const selectedOrder = ref(null)
 const searchQuery = ref('')
+const orders = ref([])
 
-// Mock menu items
-const menuItems = [
-  { id: 1, name: 'Karışık Pizza', price: 120 },
-  { id: 2, name: 'Hamburger', price: 85 },
-  { id: 3, name: 'Cola', price: 15 },
-  { id: 4, name: 'Patates Kızartması', price: 30 },
-  { id: 5, name: 'Tavuk Döner', price: 70 }
-]
-
-// Mock orders data
-const mockOrders = [
-  {
-    id: '100001',
-    customer: 'Ahmet Yılmaz',
-    type: 'masa',
-    tableNo: '5',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
-    total: 235,
-    status: 'pending',
-    date: new Date('2024-01-15T12:30:00'),
-    items: [
-      { id: '1001', name: 'Karışık Pizza', quantity: 1, price: 120 },
-      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
-      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
-    ]
-  },
-  {
-    id: '100015', 
-    customer: 'Abdullah Özdemir',
-    type: 'masa',
-    tableNo: '10',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
-    total: 155,
-    status: 'ready',
-    date: new Date('2024-01-15T13:45:00'),
-    items: [
-      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
-      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
-      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
-    ]
-  },
-  {
-    id: '100002', 
-    customer: 'Ayşe Demir',
-    type: 'online',
-    total: 155,
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
-    status: 'preparing',
-    date: new Date('2024-01-15T13:45:00'),
-    items: [
-      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
-      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
-      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
-    ]
-  },
-  {
-    id: '100003',
-    customer: 'Mehmet Kaya',
-    type: 'gelal',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
-    total: 140,
-    status: 'completed',
-    date: new Date('2024-01-15T14:15:00'),
-    items: [
-      { id: '1007', name: 'Tavuk Döner', quantity: 2, price: 70 }
-    ]
+// Fetch orders from API
+onMounted(async () => {
+  try {
+    const response = await axios.get('/orders')
+    orders.value = response.data
+  } catch (error) {
+    console.error('Error fetching orders:', error)
   }
-]
-
-const orders = ref(mockOrders)
+})
 
 const filteredOrders = computed(() => {
   let filtered = orders.value
 
-  // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(order => 
-      order.id.toLowerCase().includes(query) || 
+    filtered = filtered.filter(order =>
+      order.id.toLowerCase().includes(query) ||
       order.customer.toLowerCase().includes(query)
     )
   }
 
-  // Filter by order type
   if (activeOrderType.value !== 'all') {
     filtered = filtered.filter(order => order.type === activeOrderType.value)
   }
 
-  // Filter by status
   if (activeStatus.value !== 'all') {
     filtered = filtered.filter(order => order.status === activeStatus.value)
   }
@@ -188,7 +114,7 @@ const printOrder = (order) => {
 const getOrderTypeLabel = (type) => {
   const labels = {
     masa: 'Masa',
-    gelal: 'Gel-Al',
+    'gel-al': 'Gel-Al',
     online: 'Online'
   }
   return labels[type] || type
@@ -207,7 +133,7 @@ const getStatusLabel = (status) => {
 const getOrderTypeClass = (type) => {
   const classes = {
     masa: 'bg-blue-100 text-blue-800',
-    gelal: 'bg-green-100 text-green-800',
+    'gel-al': 'bg-green-100 text-green-800',
     online: 'bg-purple-100 text-purple-800'
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
@@ -251,7 +177,8 @@ const formatDate = (date) => {
 
       <!-- Order Type Filters -->
       <div class="relative">
-        <select v-model="activeOrderType" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select v-model="activeOrderType"
+          class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option v-for="type in orderTypes" :key="type.id" :value="type.id">
             {{ type.label }}
           </option>
@@ -266,7 +193,8 @@ const formatDate = (date) => {
 
       <!-- Status Filters -->
       <div class="relative">
-        <select v-model="activeStatus" class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select v-model="activeStatus"
+          class="w-48 pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option v-for="status in orderStatuses" :key="status.id" :value="status.id">
             {{ status.label }}
           </option>
@@ -340,10 +268,12 @@ const formatDate = (date) => {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex gap-2">
-                <button @click="showOrderDetails(order)" class="w-8 h-8 text-blue-500 bg-blue-100 rounded hover:bg-blue-200">
+                <button @click="showOrderDetails(order)"
+                  class="w-8 h-8 text-blue-500 bg-blue-100 rounded hover:bg-blue-200">
                   <Icon name="mdi:eye" />
                 </button>
-                <button @click="printOrder(order)" class="w-8 h-8 text-green-500 bg-green-100 rounded hover:bg-green-200">
+                <button @click="printOrder(order)"
+                  class="w-8 h-8 text-green-500 bg-green-100 rounded hover:bg-green-200">
                   <Icon name="mdi:printer" />
                 </button>
               </div>
