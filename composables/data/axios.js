@@ -11,10 +11,6 @@ const mockOrders = [
     customer: 'Ahmet Yılmaz',
     type: 'masa', 
     tableNo: '5',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
     phone: '5551234567',
     total: 235,
     status: 'pending',
@@ -63,10 +59,6 @@ const mockOrders = [
     customer: 'Abdullah Özdemir',
     type: 'masa',
     tableNo: '1',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
     phone: '5551234567',
     total: 150,
     status: 'ready',
@@ -82,10 +74,6 @@ const mockOrders = [
     customer: 'Ali Yılmaz',
     type: 'masa',
     tableNo: '2',
-    city: 'İstanbul',
-    district: 'Kadıköy',
-    neighborhood: 'Küçükçekmece',
-    street: 'Atatürk Mh.',
     phone: '5551234567',
     total: 150,
     status: 'ready',
@@ -101,10 +89,6 @@ const mockOrders = [
     customer: 'Cemal Yılmaz',
     type: 'masa',
     tableNo: '3',
-    city: 'İstanbul',
-    district: 'Ümraniye',
-    neighborhood: 'Atatürk Mh.',
-    street: 'Çavuşbaşı Cd.',
     phone: '5551234567',
     total: 150,
     status: 'ready',
@@ -136,10 +120,6 @@ mock.onPost('/customers').reply((config) => {
       customer: newCustomer.name,
       type: 'masa',
       tableNo: newCustomer.tableNo || '',
-      city: newCustomer.city,
-      district: newCustomer.district,
-      neighborhood: newCustomer.neighborhood,
-      street: newCustomer.street,
       phone: newCustomer.phone,
       total: 0,
       status: 'pending',
@@ -162,10 +142,12 @@ mock.onPut('/customers/:id').reply((config) => {
     // Update related orders
     mockOrders.forEach(order => {
       if (order.customer === updatedCustomer.name) {
-        order.city = updatedCustomer.city
-        order.district = updatedCustomer.district
-        order.neighborhood = updatedCustomer.neighborhood
-        order.street = updatedCustomer.street
+        if (order.type !== 'masa') {
+          order.city = updatedCustomer.city
+          order.district = updatedCustomer.district
+          order.neighborhood = updatedCustomer.neighborhood
+          order.street = updatedCustomer.street
+        }
         order.phone = updatedCustomer.phone
       }
     })

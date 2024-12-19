@@ -284,16 +284,16 @@ const formatDate = (date) => {
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ customer.city }}
+              {{ customer.city || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ customer.district }}
+              {{ customer.district || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ customer.neighborhood }}
+              {{ customer.neighborhood || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ customer.street }}
+              {{ customer.street || '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-2 py-1 text-xs rounded" :class="getStatusClass(customer.status)">
