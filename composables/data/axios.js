@@ -98,16 +98,71 @@ const mockOrders = [
   }
 ]
 
+// Mock customers data
+const mockCustomers = []
+
 // Setup mock endpoints
 mock.onGet('/orders').reply(200, mockOrders)
+mock.onGet('/customers').reply(200, mockCustomers)
+mock.onPost('/customers').reply((config) => {
+  const newCustomer = JSON.parse(config.data)
+  
+  // Add customer to mockCustomers
+  mockCustomers.push(newCustomer)
+  
+  // If customer type is 'masa', create an initial order
+  if (newCustomer.type === 'masa') {
+    const newOrder = {
+      id: `order-${Date.now()}`,
+      customer: newCustomer.name,
+      type: 'masa',
+      tableNo: newCustomer.tableNo || '',
+      city: newCustomer.city,
+      district: newCustomer.district,
+      neighborhood: newCustomer.neighborhood,
+      street: newCustomer.street,
+      phone: newCustomer.phone,
+      total: 0,
+      status: 'pending',
+      date: new Date(),
+      items: []
+    }
+    mockOrders.push(newOrder)
+  }
+  
+  return [200, newCustomer]
+})
+
+mock.onPut('/customers/:id').reply((config) => {
+  const updatedCustomer = JSON.parse(config.data)
+  const customerIndex = mockCustomers.findIndex(c => c.id === updatedCustomer.id)
+  
+  if (customerIndex !== -1) {
+    mockCustomers[customerIndex] = updatedCustomer
+    
+    // Update related orders
+    mockOrders.forEach(order => {
+      if (order.customer === updatedCustomer.name) {
+        order.city = updatedCustomer.city
+        order.district = updatedCustomer.district
+        order.neighborhood = updatedCustomer.neighborhood
+        order.street = updatedCustomer.street
+        order.phone = updatedCustomer.phone
+      }
+    })
+  }
+  
+  return [200, updatedCustomer]
+})
 
 // Export API functions
 export const useOrdersApi = () => {
   return {
     getOrders: () => axios.get('/orders'),
-    addOrder: (order) => axios.post('/orders', order)
+    createCustomer: (customer) => axios.post('/customers', customer),
+    updateCustomer: (customer) => axios.put(`/customers/${customer.id}`, customer),
+    deleteCustomer: (id) => axios.delete(`/customers/${id}`)
   }
 }
 
 export default axios
-

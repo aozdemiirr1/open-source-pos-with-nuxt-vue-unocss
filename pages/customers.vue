@@ -20,9 +20,27 @@ const activeStatus = ref('all')
 const selectedCustomer = ref(null)
 const searchQuery = ref('')
 const orders = ref([])
+const showAddCustomerModal = ref(false)
+const showEditCustomerModal = ref(false)
+const editingCustomer = ref(null)
+
+const newCustomer = ref({
+  name: '',
+  phone: '',
+  type: 'masa',
+  city: '',
+  district: '',
+  neighborhood: '',
+  street: '',
+  status: 'active'
+})
 
 // Fetch orders from API
 onMounted(async () => {
+  await fetchOrders()
+})
+
+const fetchOrders = async () => {
   try {
     const ordersApi = useOrdersApi()
     const response = await ordersApi.getOrders()
@@ -30,7 +48,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching orders:', error)
   }
-})
+}
 
 const customers = computed(() => {
   // Group orders by customer and create customer objects
@@ -83,6 +101,76 @@ const showCustomerDetails = (customer) => {
   selectedCustomer.value = customer
 }
 
+const openAddCustomerModal = () => {
+  showAddCustomerModal.value = true
+}
+
+const closeAddCustomerModal = () => {
+  showAddCustomerModal.value = false
+  newCustomer.value = {
+    name: '',
+    phone: '',
+    type: 'masa',
+    city: '',
+    district: '',
+    neighborhood: '',
+    street: '',
+    status: 'active'
+  }
+}
+
+const openEditCustomerModal = (customer) => {
+  editingCustomer.value = { ...customer }
+  showEditCustomerModal.value = true
+}
+
+const closeEditCustomerModal = () => {
+  showEditCustomerModal.value = false
+  editingCustomer.value = null
+}
+
+const saveNewCustomer = async () => {
+  try {
+    // Form validation
+    if (!newCustomer.value.name || !newCustomer.value.phone) {
+      alert('Lütfen zorunlu alanları doldurunuz')
+      return
+    }
+
+    // Add id and status if not present
+    newCustomer.value.id = `customer-${Date.now()}`
+    if (!newCustomer.value.status) {
+      newCustomer.value.status = 'active'
+    }
+
+    const ordersApi = useOrdersApi()
+    await ordersApi.createCustomer(newCustomer.value)
+    await fetchOrders() // Refresh orders list
+    closeAddCustomerModal()
+  } catch (error) {
+    console.error('Error creating customer:', error)
+    alert('Müşteri eklenirken bir hata oluştu')
+  }
+}
+
+const saveEditedCustomer = async () => {
+  try {
+    // Form validation
+    if (!editingCustomer.value.name || !editingCustomer.value.phone) {
+      alert('Lütfen zorunlu alanları doldurunuz')
+      return
+    }
+
+    const ordersApi = useOrdersApi()
+    await ordersApi.updateCustomer(editingCustomer.value)
+    await fetchOrders() // Refresh orders list
+    closeEditCustomerModal()
+  } catch (error) {
+    console.error('Error updating customer:', error)
+    alert('Müşteri güncellenirken bir hata oluştu')
+  }
+}
+
 const getCustomerTypeLabel = (type) => {
   const customerType = customerTypes.find(t => t.id === type)
   return customerType ? customerType.label : type
@@ -125,7 +213,7 @@ const formatDate = (date) => {
         <h1 class="text-2xl font-bold text-gray-800">Müşteriler</h1>
         <p class="text-gray-600">Müşteri listesi ve detayları</p>
       </div>
-      <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
+      <button @click="openAddCustomerModal" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
         <Icon name="mdi:account-plus" />
         Yeni Müşteri
       </button>
@@ -221,7 +309,7 @@ const formatDate = (date) => {
                   class="w-8 h-8 text-blue-500 bg-blue-100 rounded hover:bg-blue-200">
                   <Icon name="mdi:eye" />
                 </button>
-                <button class="w-8 h-8 text-green-500 bg-green-100 rounded hover:bg-green-200">
+                <button @click="openEditCustomerModal(customer)" class="w-8 h-8 text-green-500 bg-green-100 rounded hover:bg-green-200">
                   <Icon name="mdi:pencil" />
                 </button>
               </div>
@@ -283,6 +371,138 @@ const formatDate = (date) => {
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Customer Modal -->
+    <div v-if="showAddCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-[600px] p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Yeni Müşteri Ekle</h3>
+          <button @click="closeAddCustomerModal" class="text-gray-500 hover:text-gray-700">
+            <Icon name="mdi:close" />
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
+            <input v-model="newCustomer.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+            <input v-model="newCustomer.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Müşteri Tipi</label>
+            <select v-model="newCustomer.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option v-for="type in customerTypes.filter(t => t.id !== 'all')" :key="type.id" :value="type.id">
+                {{ type.label }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">İl</label>
+            <input v-model="newCustomer.city" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">İlçe</label>
+            <input v-model="newCustomer.district" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mahalle</label>
+            <input v-model="newCustomer.neighborhood" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Cadde/Sokak</label>
+            <input v-model="newCustomer.street" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button @click="closeAddCustomerModal" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            İptal
+          </button>
+          <button @click="saveNewCustomer" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div v-if="showEditCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-[600px] p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Müşteri Düzenle</h3>
+          <button @click="closeEditCustomerModal" class="text-gray-500 hover:text-gray-700">
+            <Icon name="mdi:close" />
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
+            <input v-model="editingCustomer.name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+            <input v-model="editingCustomer.phone" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Müşteri Tipi</label>
+            <select v-model="editingCustomer.type" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option v-for="type in customerTypes.filter(t => t.id !== 'all')" :key="type.id" :value="type.id">
+                {{ type.label }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">İl</label>
+            <input v-model="editingCustomer.city" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">İlçe</label>
+            <input v-model="editingCustomer.district" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mahalle</label>
+            <input v-model="editingCustomer.neighborhood" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Cadde/Sokak</label>
+            <input v-model="editingCustomer.street" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Durum</label>
+            <select v-model="editingCustomer.status" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option value="active">Aktif</option>
+              <option value="inactive">Pasif</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button @click="closeEditCustomerModal" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            İptal
+          </button>
+          <button @click="saveEditedCustomer" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+            Kaydet
+          </button>
         </div>
       </div>
     </div>
