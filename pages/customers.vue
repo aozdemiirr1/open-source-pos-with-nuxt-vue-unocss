@@ -335,7 +335,7 @@ const formatDate = (date) => {
             <div class="space-y-2">
               <p><span class="text-gray-600">Ad Soyad:</span> {{ selectedCustomer.name }}</p>
               <p><span class="text-gray-600">Müşteri Tipi:</span>
-                <span class="px-2 py-1 text-xs rounded" :class="getCustomerTypeClass(selectedCustomer.type)">
+                <span class="px-2 py-1 ml-2 text-xs rounded" :class="getCustomerTypeClass(selectedCustomer.type)">
                   {{ getCustomerTypeLabel(selectedCustomer.type) }}
                 </span>
               </p>
