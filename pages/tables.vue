@@ -1,8 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { faker } from '@faker-js/faker'
+import { ref, computed, watch } from 'vue'
 
-// Referencing the menu items from orders page
 const menuItems = [
     { id: 1, name: 'Karışık Pizza', price: 120 },
     { id: 2, name: 'Hamburger', price: 85 },
@@ -21,31 +19,83 @@ const activeStatus = ref('all')
 const selectedTable = ref(null)
 const searchQuery = ref('')
 
-// Generate mock table data
-const tables = ref(Array.from({ length: 12 }, (_, index) => {
-    const isActive = Math.random() > 0.3
-    const items = isActive ? Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => {
-        const menuItem = faker.helpers.arrayElement(menuItems)
-        return {
-            id: faker.string.numeric(4),
-            name: menuItem.name,
-            quantity: faker.number.int({ min: 1, max: 3 }),
-            price: menuItem.price
+// Mock orders data from orders.vue
+const mockOrders = [
+  {
+    id: '100001',
+    customer: 'Ahmet Yılmaz',
+    type: 'masa',
+    tableNo: '5',
+    total: 235,
+    status: 'pending',
+    date: new Date('2024-01-15T12:30:00'),
+    items: [
+      { id: '1001', name: 'Karışık Pizza', quantity: 1, price: 120 },
+      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
+      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
+    ]
+  },
+  {
+    id: '100015', 
+    customer: 'Abdullah Özdemir',
+    type: 'masa',
+    tableNo: '10',
+    total: 155,
+    status: 'ready',
+    date: new Date('2024-01-15T13:45:00'),
+    items: [
+      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
+      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
+      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
+    ]
+  }
+]
+
+const orders = ref(mockOrders)
+const tables = ref([])
+
+// Watch orders for changes and update tables
+watch(() => orders.value, (newOrders) => {
+    updateTables()
+}, { deep: true })
+
+// Create tables and add orders
+const updateTables = () => {
+    // Create 12 tables
+    tables.value = Array.from({ length: 12 }, (_, index) => {
+        const tableNo = (index + 1).toString()
+        
+        // Check if there's an active order for this table number
+        const tableOrder = orders.value.find(order => 
+            order.type === 'masa' && 
+            order.tableNo === tableNo && 
+            ['pending', 'preparing', 'ready'].includes(order.status)
+        )
+
+        if (tableOrder) {
+            return {
+                id: tableOrder.id,
+                number: index + 1,
+                status: 'active',
+                customer: tableOrder.customer,
+                startTime: tableOrder.date,
+                items: tableOrder.items,
+                total: tableOrder.total
+            }
         }
-    }) : []
 
-    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-
-    return {
-        id: faker.string.numeric(4),
-        number: index + 1,
-        status: isActive ? 'active' : 'empty',
-        customer: isActive ? faker.person.fullName() : null,
-        startTime: isActive ? faker.date.recent() : null,
-        items,
-        total
-    }
-}))
+        // If table is empty
+        return {
+            id: `table-${index + 1}`,
+            number: index + 1,
+            status: 'empty',
+            customer: null,
+            startTime: null,
+            items: [],
+            total: 0
+        }
+    })
+}
 
 const filteredTables = computed(() => {
     let filtered = tables.value
@@ -147,6 +197,9 @@ const printTableReceipt = (table) => {
     printWindow.document.close()
     printWindow.print()
 }
+
+// Initialize tables on load
+updateTables()
 </script>
 
 <template>
@@ -203,7 +256,7 @@ const printTableReceipt = (table) => {
                 <div class="space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Müşteri</span>
-                        <span class="font-medium">{{ table.customer }}</span>
+                        <span class="font-medium">{{ table.customer || '-' }}</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">Ürün Sayısı</span>

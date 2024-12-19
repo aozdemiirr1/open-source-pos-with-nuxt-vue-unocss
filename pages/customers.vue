@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { faker } from '@faker-js/faker'
 
 const customerTypes = [
   { id: 'all', label: 'Tümü', icon: 'mdi:clipboard-list' },
@@ -9,26 +8,107 @@ const customerTypes = [
   { id: 'online', label: 'Online', icon: 'mdi:truck-delivery' }
 ]
 
-// Generate fake customers
-const generateCustomers = () => {
-    return Array.from({ length: 50 }, () => ({
-        id: faker.string.uuid(),
-        name: faker.person.fullName(),
-        phone: faker.phone.number(),
-        type: customerTypes.slice(1).map(t => t.id)[Math.floor(Math.random() * 3)],
-        city: faker.location.city(),
-        district: faker.location.county(),
-        neighborhood: faker.location.street(),
-        street: faker.location.streetAddress(),
-        orders: Array.from({ length: Math.floor(Math.random() * 5) + 1 }, () => ({
-            id: faker.string.uuid(),
-            product: faker.commerce.productName(),
-            price: faker.commerce.price()
-        }))
-    }))
-}
+const customers = ref([
+  {
+    id: '100001',
+    name: 'Ahmet Yılmaz',
+    phone: '555-0123',
+    type: 'masa',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece', 
+    street: 'Atatürk Mh.',
+    orders: [
+      {
+        id: '1001',
+        product: 'Karışık Pizza',
+        price: '120.00'
+      },
+      {
+        id: '1002',
+        product: 'Cola',
+        price: '30.00'
+      },
+      {
+        id: '1003',
+        product: 'Patates Kızartması',
+        price: '30.00'
+      }
+    ]
+  },
+  {
+    id: '100015',
+    name: 'Abdullah Özdemir', 
+    phone: '555-0124',
+    type: 'masa',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    orders: [
+      {
+        id: '1004',
+        product: 'Hamburger',
+        price: '85.00'
+      },
+      {
+        id: '1005',
+        product: 'Patates Kızartması',
+        price: '30.00'
+      },
+      {
+        id: '1006',
+        product: 'Cola',
+        price: '15.00'
+      }
+    ]
+  },
+  {
+    id: '100002',
+    name: 'Ayşe Demir',
+    phone: '555-0125', 
+    type: 'online',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    orders: [
+      {
+        id: '1004',
+        product: 'Hamburger',
+        price: '85.00'
+      },
+      {
+        id: '1005',
+        product: 'Patates Kızartması',
+        price: '30.00'
+      },
+      {
+        id: '1006',
+        product: 'Cola',
+        price: '15.00'
+      }
+    ]
+  },
+  {
+    id: '100003',
+    name: 'Mehmet Kaya',
+    phone: '555-0126',
+    type: 'gel-al',
+    city: 'İstanbul', 
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    orders: [
+      {
+        id: '1007',
+        product: 'Tavuk Döner',
+        price: '140.00'
+      }
+    ]
+  }
+])
 
-const customers = ref(generateCustomers())
 const searchQuery = ref('')
 const showAddCustomerModal = ref(false)
 const showOrdersModal = ref(false)
@@ -163,7 +243,7 @@ const saveCustomer = () => {
     } else {
         customers.value.unshift({
             ...newCustomer.value,
-            id: faker.string.uuid(),
+            id: String(customers.value.length + 1),
             orders: []
         })
     }

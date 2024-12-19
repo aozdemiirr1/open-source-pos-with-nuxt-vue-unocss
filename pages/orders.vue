@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { faker } from '@faker-js/faker'
 
 const orderTypes = [
   { id: 'all', label: 'Tümü', icon: 'mdi:clipboard-list' },
@@ -22,7 +21,7 @@ const activeStatus = ref('all')
 const selectedOrder = ref(null)
 const searchQuery = ref('')
 
-// Generate mock menu items
+// Mock menu items
 const menuItems = [
   { id: 1, name: 'Karışık Pizza', price: 120 },
   { id: 2, name: 'Hamburger', price: 85 },
@@ -31,30 +30,79 @@ const menuItems = [
   { id: 5, name: 'Tavuk Döner', price: 70 }
 ]
 
-// Generate mock orders with items
-const orders = ref(Array.from({ length: 20 }, () => {
-  const orderItems = Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => {
-    const menuItem = faker.helpers.arrayElement(menuItems)
-    return {
-      id: faker.string.numeric(4),
-      name: menuItem.name,
-      quantity: faker.number.int({ min: 1, max: 3 }),
-      price: menuItem.price
-    }
-  })
-
-  const total = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-
-  return {
-    id: faker.string.numeric(6),
-    customer: faker.person.fullName(),
-    type: faker.helpers.arrayElement(['masa', 'gelal', 'online']),
-    total: total,
-    status: faker.helpers.arrayElement(['pending', 'preparing', 'ready', 'completed']),
-    date: faker.date.recent(),
-    items: orderItems
+// Mock orders data
+const mockOrders = [
+  {
+    id: '100001',
+    customer: 'Ahmet Yılmaz',
+    type: 'masa',
+    tableNo: '5',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    total: 235,
+    status: 'pending',
+    date: new Date('2024-01-15T12:30:00'),
+    items: [
+      { id: '1001', name: 'Karışık Pizza', quantity: 1, price: 120 },
+      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
+      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
+    ]
+  },
+  {
+    id: '100015', 
+    customer: 'Abdullah Özdemir',
+    type: 'masa',
+    tableNo: '10',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    total: 155,
+    status: 'ready',
+    date: new Date('2024-01-15T13:45:00'),
+    items: [
+      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
+      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
+      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
+    ]
+  },
+  {
+    id: '100002', 
+    customer: 'Ayşe Demir',
+    type: 'online',
+    total: 155,
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    status: 'preparing',
+    date: new Date('2024-01-15T13:45:00'),
+    items: [
+      { id: '1004', name: 'Hamburger', quantity: 1, price: 85 },
+      { id: '1005', name: 'Patates Kızartması', quantity: 1, price: 30 },
+      { id: '1006', name: 'Cola', quantity: 1, price: 15 }
+    ]
+  },
+  {
+    id: '100003',
+    customer: 'Mehmet Kaya',
+    type: 'gelal',
+    city: 'İstanbul',
+    district: 'Kadıköy',
+    neighborhood: 'Küçükçekmece',
+    street: 'Atatürk Mh.',
+    total: 140,
+    status: 'completed',
+    date: new Date('2024-01-15T14:15:00'),
+    items: [
+      { id: '1007', name: 'Tavuk Döner', quantity: 2, price: 70 }
+    ]
   }
-}))
+]
+
+const orders = ref(mockOrders)
 
 const filteredOrders = computed(() => {
   let filtered = orders.value
@@ -105,6 +153,7 @@ const printOrder = (order) => {
             <p>Sipariş No: #${order.id}</p>
             <p>Tarih: ${formatDate(order.date)}</p>
             <p>Müşteri: ${order.customer}</p>
+            ${order.type === 'masa' ? `<p>Masa No: ${order.tableNo}</p>` : ''}
           </div>
           <table>
             <thead>
@@ -168,8 +217,8 @@ const getStatusClass = (status) => {
   const classes = {
     pending: 'bg-yellow-100 text-yellow-800',
     preparing: 'bg-blue-100 text-blue-800',
-    ready: 'bg-green-100 text-green-800',
-    completed: 'bg-gray-100 text-gray-800'
+    ready: 'bg-orange-100 text-orange-800',
+    completed: 'bg-green-100 text-green-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
@@ -246,6 +295,9 @@ const formatDate = (date) => {
               Tip
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Masa No
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Tutar
             </th>
             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -271,6 +323,9 @@ const formatDate = (date) => {
               <span class="px-2 py-1 text-xs rounded" :class="getOrderTypeClass(order.type)">
                 {{ getOrderTypeLabel(order.type) }}
               </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ order.type === 'masa' ? order.tableNo : '-' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               ₺{{ order.total }}
@@ -323,6 +378,10 @@ const formatDate = (date) => {
               <span class="px-2 py-1 text-xs rounded" :class="getOrderTypeClass(selectedOrder.type)">
                 {{ getOrderTypeLabel(selectedOrder.type) }}
               </span>
+            </div>
+            <div v-if="selectedOrder.type === 'masa'">
+              <p class="text-sm text-gray-600">Masa No</p>
+              <p class="font-medium">{{ selectedOrder.tableNo }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-600">Durum</p>
