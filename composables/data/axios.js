@@ -95,6 +95,25 @@ const mockOrders = [
       { id: '1002', name: 'Cola', quantity: 2, price: 15 },
       { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
     ]
+  },
+  {
+    id: '100006',
+    customer: 'Cemal Yılmaz',
+    type: 'masa',
+    tableNo: '3',
+    city: 'İstanbul',
+    district: 'Ümraniye',
+    neighborhood: 'Atatürk Mh.',
+    street: 'Çavuşbaşı Cd.',
+    phone: '5551234567',
+    total: 150,
+    status: 'ready',
+    date: new Date('2024-01-15T15:30:00'),
+    items: [
+      { id: '1001', name: 'Pizza', quantity: 1, price: 150 },
+      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
+      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
+    ]
   }
 ]
 
