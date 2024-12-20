@@ -98,6 +98,39 @@ const mockOrders = [
       { id: '1002', name: 'Cola', quantity: 2, price: 15 },
       { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
     ]
+  },
+  {
+    id: '100007',
+    customer: 'Aydın Can',
+    type: 'online',
+    city: 'İstanbul',
+    district: 'Ümraniye',
+    neighborhood: 'Atatürk Mahallesi',
+    street: 'Çağlayan Cd.',
+    phone: '5551234567',
+    total: 150,
+    status: 'ready',
+    date: new Date('2024-01-15T15:30:00'),
+    items: [
+      { id: '1001', name: 'Pizza', quantity: 1, price: 150 },
+      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
+      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
+    ]
+  },
+  {
+    id: '100008',
+    customer: 'Furkan Tarık',
+    type: 'masa',
+    tableNo: '4',
+    phone: '5551234567',
+    total: 150,
+    status: 'ready',
+    date: new Date('2024-01-15T15:30:00'),
+    items: [
+      { id: '1001', name: 'Pizza', quantity: 1, price: 150 },
+      { id: '1002', name: 'Cola', quantity: 2, price: 15 },
+      { id: '1003', name: 'Patates Kızartması', quantity: 1, price: 30 }
+    ]
   }
 ]
 
