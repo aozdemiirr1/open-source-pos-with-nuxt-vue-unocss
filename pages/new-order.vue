@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useOrdersApi } from '../composables/data/axios'
 
 // Menü Kategorileri
 const menuCategories = [
@@ -195,24 +196,146 @@ const decreaseQuantity = (item) => {
     }
 }
 
-const completeOrder = () => {
-    const order = {
-        id: Date.now(),
-        items: [...cart.value],
-        total: cartTotal.value,
-        status: 'pending',
-        date: new Date(),
-        orderDetails: cart.value[0] // Sipariş detaylarını al
+const completeOrder = async () => {
+  try {
+    if (!orderType.value) {
+      alert('Lütfen sipariş tipini seçin')
+      return
     }
+
+    if (!customerName.value) {
+      alert('Lütfen müşteri adı girin')
+      return
+    }
+
+    if (orderType.value === 'masa' && !tableNumber.value) {
+      alert('Lütfen masa numarası seçin')
+      return
+    }
+
+    if (orderType.value === 'online' && (!customerPhone.value || !customerAddress.value)) {
+      alert('Lütfen telefon ve adres bilgilerini girin')
+      return
+    }
+
+    const ordersApi = useOrdersApi()
     
-    currentOrder.value = order
-    showReceipt.value = true
+    // Sipariş bilgilerini hazırla
+    const order = {
+      id: `order-${Date.now()}`,
+      customer: customerName.value,
+      type: orderType.value,
+      tableNo: orderType.value === 'masa' ? tableNumber.value : null,
+      phone: customerPhone.value,
+      city: customerAddress.value?.split(',')[0]?.trim(),
+      district: customerAddress.value?.split(',')[1]?.trim(),
+      neighborhood: customerAddress.value?.split(',')[2]?.trim(),
+      street: customerAddress.value?.split(',')[3]?.trim(),
+      total: cartTotal.value,
+      status: 'pending',
+      date: new Date(),
+      items: cart.value
+    }
+
+    // Müşteri bilgilerini hazırla
+    const customer = {
+      id: `customer-${Date.now()}`,
+      name: customerName.value,
+      type: orderType.value,
+      status: 'active',
+      tableNo: orderType.value === 'masa' ? tableNumber.value : null,
+      phone: orderType.value !== 'masa' ? customerPhone.value : null,
+      city: orderType.value !== 'masa' ? order.city : null,
+      district: orderType.value !== 'masa' ? order.district : null,
+      neighborhood: orderType.value !== 'masa' ? order.neighborhood : null,
+      street: orderType.value !== 'masa' ? order.street : null
+    }
+
+    // Önce müşteriyi kaydet
+    await ordersApi.createCustomer(customer)
+    
+    // Sonra siparişi kaydet
+    await ordersApi.createOrder(order)
+
+    // Başarılı mesajı göster ve formu temizle
+    alert('Sipariş başarıyla oluşturuldu')
+    cart.value = []
+    selectedProduct.value = null
+    orderType.value = ''
+    tableNumber.value = ''
+    customerName.value = ''
+    customerPhone.value = ''
+    customerAddress.value = ''
+    
+  } catch (error) {
+    console.error('Error completing order:', error)
+    alert('Sipariş oluşturulurken bir hata oluştu')
+  }
 }
 
 const closeReceipt = () => {
     showReceipt.value = false
     currentOrder.value = null
     cart.value = []
+}
+
+const saveOrder = async () => {
+  try {
+    const ordersApi = useOrdersApi()
+    
+    // Sipariş bilgilerini hazırla
+    const order = {
+      id: `order-${Date.now()}`,
+      customer: customerName.value,
+      type: orderType.value,
+      tableNo: orderType.value === 'masa' ? tableNumber.value : null,
+      phone: customerPhone.value,
+      city: customerAddress.value?.split(',')[0]?.trim(),
+      district: customerAddress.value?.split(',')[1]?.trim(),
+      neighborhood: customerAddress.value?.split(',')[2]?.trim(),
+      street: customerAddress.value?.split(',')[3]?.trim(),
+      total: cartTotal.value,
+      status: 'pending',
+      date: new Date(),
+      items: cart.value.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        extras: item.extras,
+        removedIngredients: item.removedIngredients,
+        notes: item.notes
+      }))
+    }
+
+    // Müşteri bilgilerini hazırla
+    const customer = {
+      id: `customer-${Date.now()}`,
+      name: customerName.value,
+      type: orderType.value,
+      status: 'active',
+      tableNo: orderType.value === 'masa' ? tableNumber.value : null,
+      phone: orderType.value !== 'masa' ? customerPhone.value : null,
+      city: orderType.value !== 'masa' ? order.city : null,
+      district: orderType.value !== 'masa' ? order.district : null,
+      neighborhood: orderType.value !== 'masa' ? order.neighborhood : null,
+      street: orderType.value !== 'masa' ? order.street : null
+    }
+
+    // Önce müşteriyi kaydet
+    await ordersApi.createCustomer(customer)
+    
+    // Sonra siparişi kaydet
+    await ordersApi.createOrder(order)
+
+    // Başarılı mesajı göster ve formu temizle
+    alert('Sipariş başarıyla oluşturuldu')
+    closeReceipt()
+    
+  } catch (error) {
+    console.error('Error saving order:', error)
+    alert('Sipariş oluşturulurken bir hata oluştu')
+  }
 }
 </script>
 

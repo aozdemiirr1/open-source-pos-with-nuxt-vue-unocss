@@ -137,32 +137,37 @@ const mockOrders = [
 // Mock customers data
 const mockCustomers = []
 
+// Mock tables data
+const mockTables = [
+  { id: 1, number: '1', status: 'empty', currentOrder: null },
+  { id: 2, number: '2', status: 'empty', currentOrder: null },
+  { id: 3, number: '3', status: 'empty', currentOrder: null },
+  { id: 4, number: '4', status: 'empty', currentOrder: null },
+  { id: 5, number: '5', status: 'empty', currentOrder: null },
+  { id: 6, number: '6', status: 'empty', currentOrder: null }
+]
+
 // Setup mock endpoints
 mock.onGet('/orders').reply(200, mockOrders)
 mock.onGet('/customers').reply(200, mockCustomers)
 mock.onPost('/customers').reply((config) => {
   const newCustomer = JSON.parse(config.data)
   
-  // Add customer to mockCustomers
-  mockCustomers.push(newCustomer)
-  
-  // If customer type is 'masa', create an initial order
-  if (newCustomer.type === 'masa') {
-    const newOrder = {
-      id: `order-${Date.now()}`,
-      customer: newCustomer.name,
-      type: 'masa',
-      tableNo: newCustomer.tableNo || '',
-      phone: newCustomer.phone,
-      total: 0,
-      status: 'pending',
-      date: new Date(),
-      items: []
-    }
-    mockOrders.push(newOrder)
+  // Mevcut müşteriyi kontrol et
+  const existingCustomer = mockCustomers.find(c => 
+    c.name === newCustomer.name && 
+    c.type === newCustomer.type
+  )
+
+  if (existingCustomer) {
+    // Mevcut müşteriyi güncelle
+    Object.assign(existingCustomer, newCustomer)
+    return [200, existingCustomer]
+  } else {
+    // Yeni müşteri ekle
+    mockCustomers.push(newCustomer)
+    return [200, newCustomer]
   }
-  
-  return [200, newCustomer]
 })
 
 mock.onPut('/customers/:id').reply((config) => {
@@ -189,13 +194,49 @@ mock.onPut('/customers/:id').reply((config) => {
   return [200, updatedCustomer]
 })
 
+mock.onPost('/orders').reply((config) => {
+  const newOrder = JSON.parse(config.data)
+  
+  // Siparişi orders listesine ekle
+  mockOrders.push(newOrder)
+
+  // Masa siparişi ise tables listesini güncelle
+  if (newOrder.type === 'masa') {
+    const table = mockTables.find(t => t.number === newOrder.tableNo)
+    if (table) {
+      table.status = 'occupied'
+      table.currentOrder = newOrder.id
+    }
+  }
+
+  return [200, newOrder]
+})
+
+// Tables endpoint'lerini ekleyelim
+mock.onGet('/tables').reply(() => [200, mockTables])
+
+mock.onPut('/tables/:number').reply((config) => {
+  const tableNumber = config.url.split('/').pop()
+  const updatedTable = JSON.parse(config.data)
+  const table = mockTables.find(t => t.number === tableNumber)
+  
+  if (table) {
+    Object.assign(table, updatedTable)
+    return [200, table]
+  }
+  
+  return [404, { message: 'Table not found' }]
+})
+
 // Export API functions
 export const useOrdersApi = () => {
   return {
     getOrders: () => axios.get('/orders'),
+    getCustomers: () => axios.get('/customers'),
     createCustomer: (customer) => axios.post('/customers', customer),
     updateCustomer: (customer) => axios.put(`/customers/${customer.id}`, customer),
-    deleteCustomer: (id) => axios.delete(`/customers/${id}`)
+    deleteCustomer: (id) => axios.delete(`/customers/${id}`),
+    createOrder: (order) => axios.post('/orders', order)
   }
 }
 
