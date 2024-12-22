@@ -206,6 +206,10 @@ mock.onPost('/orders').reply((config) => {
     if (table) {
       table.status = 'occupied'
       table.currentOrder = newOrder.id
+      table.customerName = newOrder.customer
+      table.customerPhone = newOrder.phone
+      table.orderTotal = newOrder.total
+      table.orderDate = newOrder.date
     }
   }
 

@@ -95,7 +95,10 @@ const orderType = ref('')
 const tableNumber = ref('')
 const customerName = ref('')
 const customerPhone = ref('')
-const customerAddress = ref('')
+const customerCity = ref('')
+const customerDistrict = ref('')
+const customerNeighborhood = ref('')
+const customerStreet = ref('')
 
 // Computed Properties
 const filteredProducts = computed(() => {
@@ -118,7 +121,10 @@ const showProductModal = (product) => {
     tableNumber.value = ''
     customerName.value = ''
     customerPhone.value = ''
-    customerAddress.value = ''
+    customerCity.value = ''
+    customerDistrict.value = ''
+    customerNeighborhood.value = ''
+    customerStreet.value = ''
 }
 
 const calculateItemTotal = (item) => {
@@ -149,13 +155,14 @@ const addToCart = () => {
         return
     }
 
-    if (orderType.value !== 'masa' && !customerName.value) {
+    if ((orderType.value === 'online' || orderType.value === 'gelal') && !customerName.value) {
         alert('Lütfen müşteri adı girin')
         return
     }
 
-    if (orderType.value === 'online' && (!customerPhone.value || !customerAddress.value)) {
-        alert('Lütfen telefon ve adres bilgilerini girin')
+    if ((orderType.value === 'online' || orderType.value === 'gelal') && 
+        (!customerCity.value || !customerDistrict.value || !customerNeighborhood.value || !customerStreet.value)) {
+        alert('Lütfen adres bilgilerini eksiksiz girin')
         return
     }
 
@@ -177,7 +184,10 @@ const addToCart = () => {
         tableNumber: tableNumber.value,
         customerName: customerName.value,
         customerPhone: customerPhone.value,
-        customerAddress: customerAddress.value
+        customerCity: customerCity.value,
+        customerDistrict: customerDistrict.value,
+        customerNeighborhood: customerNeighborhood.value,
+        customerStreet: customerStreet.value
     }
 
     cart.value.push(cartItem)
@@ -198,28 +208,29 @@ const decreaseQuantity = (item) => {
 
 const completeOrder = async () => {
   try {
+    // Form validasyonu
     if (!orderType.value) {
       alert('Lütfen sipariş tipini seçin')
       return
     }
 
-    if (!customerName.value) {
-      alert('Lütfen müşteri adı girin')
-      return
-    }
-
-    if (orderType.value === 'masa' && !tableNumber.value) {
-      alert('Lütfen masa numarası seçin')
-      return
-    }
-
-    if (orderType.value === 'online' && (!customerPhone.value || !customerAddress.value)) {
-      alert('Lütfen telefon ve adres bilgilerini girin')
-      return
+    if (orderType.value === 'masa') {
+      if (!tableNumber.value || !customerName.value || !customerPhone.value) {
+        alert('Lütfen masa numarası, müşteri adı ve telefon numarası girin')
+        return
+      }
     }
 
     const ordersApi = useOrdersApi()
     
+    // Adres bilgilerini birleştir
+    const fullAddress = orderType.value !== 'masa' ? {
+      city: customerCity.value,
+      district: customerDistrict.value,
+      neighborhood: customerNeighborhood.value,
+      street: customerStreet.value
+    } : null
+
     // Sipariş bilgilerini hazırla
     const order = {
       id: `order-${Date.now()}`,
@@ -227,50 +238,41 @@ const completeOrder = async () => {
       type: orderType.value,
       tableNo: orderType.value === 'masa' ? tableNumber.value : null,
       phone: customerPhone.value,
-      city: customerAddress.value?.split(',')[0]?.trim(),
-      district: customerAddress.value?.split(',')[1]?.trim(),
-      neighborhood: customerAddress.value?.split(',')[2]?.trim(),
-      street: customerAddress.value?.split(',')[3]?.trim(),
+      city: fullAddress?.city,
+      district: fullAddress?.district,
+      neighborhood: fullAddress?.neighborhood,
+      street: fullAddress?.street,
       total: cartTotal.value,
       status: 'pending',
       date: new Date(),
       items: cart.value
     }
 
-    // Müşteri bilgilerini hazırla
-    const customer = {
-      id: `customer-${Date.now()}`,
-      name: customerName.value,
-      type: orderType.value,
-      status: 'active',
-      tableNo: orderType.value === 'masa' ? tableNumber.value : null,
-      phone: orderType.value !== 'masa' ? customerPhone.value : null,
-      city: orderType.value !== 'masa' ? order.city : null,
-      district: orderType.value !== 'masa' ? order.district : null,
-      neighborhood: orderType.value !== 'masa' ? order.neighborhood : null,
-      street: orderType.value !== 'masa' ? order.street : null
-    }
-
-    // Önce müşteriyi kaydet
-    await ordersApi.createCustomer(customer)
-    
-    // Sonra siparişi kaydet
+    // Siparişi kaydet
     await ordersApi.createOrder(order)
 
     // Başarılı mesajı göster ve formu temizle
     alert('Sipariş başarıyla oluşturuldu')
-    cart.value = []
-    selectedProduct.value = null
-    orderType.value = ''
-    tableNumber.value = ''
-    customerName.value = ''
-    customerPhone.value = ''
-    customerAddress.value = ''
+    resetForm()
     
   } catch (error) {
     console.error('Error completing order:', error)
     alert('Sipariş oluşturulurken bir hata oluştu')
   }
+}
+
+const resetForm = () => {
+  cart.value = []
+  selectedProduct.value = null
+  orderType.value = ''
+  tableNumber.value = ''
+  customerName.value = ''
+  customerPhone.value = ''
+  customerCity.value = ''
+  customerDistrict.value = ''
+  customerNeighborhood.value = ''
+  customerStreet.value = ''
+  orderNotes.value = ''
 }
 
 const closeReceipt = () => {
@@ -290,10 +292,10 @@ const saveOrder = async () => {
       type: orderType.value,
       tableNo: orderType.value === 'masa' ? tableNumber.value : null,
       phone: customerPhone.value,
-      city: customerAddress.value?.split(',')[0]?.trim(),
-      district: customerAddress.value?.split(',')[1]?.trim(),
-      neighborhood: customerAddress.value?.split(',')[2]?.trim(),
-      street: customerAddress.value?.split(',')[3]?.trim(),
+      city: customerCity.value,
+      district: customerDistrict.value,
+      neighborhood: customerNeighborhood.value,
+      street: customerStreet.value,
       total: cartTotal.value,
       status: 'pending',
       date: new Date(),
@@ -485,22 +487,38 @@ const saveOrder = async () => {
                         <div v-if="orderType === 'masa'">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Masa Numarası</label>
                             <input v-model="tableNumber" type="number" class="w-full p-2 border rounded-lg">
-                        </div>
-
-                        <div v-if="orderType !== 'masa'">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Müşteri Adı</label>
+                            
+                            <label class="block text-sm font-medium text-gray-700 mt-3 mb-1">Müşteri Adı Soyadı</label>
                             <input v-model="customerName" type="text" class="w-full p-2 border rounded-lg">
+                            
+                            <label class="block text-sm font-medium text-gray-700 mt-3 mb-1">Telefon Numarası</label>
+                            <input v-model="customerPhone" type="text" class="w-full p-2 border rounded-lg">
                         </div>
 
-                        <template v-if="orderType === 'online'">
+                        <template v-if="orderType === 'gelal' || orderType === 'online'">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                                <input v-model="customerPhone" type="tel" class="w-full p-2 border rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Müşteri Adı</label>
+                                <input v-model="customerName" type="text" class="w-full p-2 border rounded-lg">
                             </div>
+                            
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Adres</label>
-                                <textarea v-model="customerAddress" class="w-full p-2 border rounded-lg"
-                                    rows="2"></textarea>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">İl</label>
+                                <input v-model="customerCity" type="text" class="w-full p-2 border rounded-lg">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">İlçe</label>
+                                <input v-model="customerDistrict" type="text" class="w-full p-2 border rounded-lg">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Mahalle</label>
+                                <input v-model="customerNeighborhood" type="text" class="w-full p-2 border rounded-lg">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cadde/Sokak</label>
+                                <input v-model="customerStreet" type="text" class="w-full p-2 border rounded-lg">
                             </div>
                         </template>
                     </div>
