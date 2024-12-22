@@ -11,7 +11,7 @@ const showAddUserModal = ref(false)
 const newUser = ref({
   email: '',
   password: '',
-  role: 'Kullanıcı',
+  role: 'Şube',
   status: 'active'
 })
 
@@ -40,7 +40,7 @@ const handleAddUser = () => {
   newUser.value = {
     email: '',
     password: '',
-    role: 'Kullanıcı',
+    role: 'Şube',
     status: 'active'
   }
 
@@ -169,14 +169,14 @@ const getStatusClass = (status) => {
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="flex justify-end gap-2">
+                <div class="flex gap-2 justify-end">
                   <button @click="openChangePasswordModal(user.email)"
-                    class="text-blue-600 hover:text-blue-900 font-medium text-sm">
-                    Şifre Değiştir
+                    class="w-8 h-8 text-blue-500 bg-blue-100 rounded hover:bg-blue-200">
+                    <Icon name="mdi:key" />
                   </button>
-                  <button @click="handleDeleteUser(user.email)"
-                    class="text-red-600 hover:text-red-900 font-medium text-sm">
-                    Sil
+                  <button @click="handleDeleteUser(user.email)" 
+                    class="w-8 h-8 text-red-500 bg-red-100 rounded hover:bg-red-200">
+                    <Icon name="mdi:delete" />
                   </button>
                 </div>
               </td>
@@ -213,7 +213,7 @@ const getStatusClass = (status) => {
             <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
             <select v-model="newUser.role" 
               class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-              <option value="Kullanıcı">Şube</option>
+              <option value="Şube">Şube</option>
               <option value="Admin">Admin</option>
             </select>
           </div>
