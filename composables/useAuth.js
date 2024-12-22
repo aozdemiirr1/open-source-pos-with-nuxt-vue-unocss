@@ -6,6 +6,7 @@ const users = ref([
     email: 'aozdemiirr05@gmail.com',
     password: '123456',
     role: 'Admin',
+    name: 'Abdullah Özdemir',
     lastLogin: new Date().toLocaleString('tr-TR'),
     status: 'active'
   },
@@ -13,6 +14,8 @@ const users = ref([
     email: 'sube@gmail.com',
     password: '123456',
     role: 'Şube',
+    name: 'Kadıköy Şubesi',
+    branchName: 'Kadıköy Şubesi',
     lastLogin: new Date().toLocaleString('tr-TR'),
     status: 'active'
   }
@@ -83,6 +86,24 @@ export const useAuth = () => {
     return false
   }
 
+  const isAdmin = () => {
+    const currentUser = getCurrentUser()
+    return currentUser?.role === 'Admin'
+  }
+
+  const getBranchName = () => {
+    const currentUser = getCurrentUser()
+    return currentUser?.branchName || ''
+  }
+
+  const getUserDisplayName = () => {
+    const currentUser = getCurrentUser()
+    if (currentUser?.role === 'Admin') {
+      return currentUser.name
+    }
+    return currentUser?.branchName || ''
+  }
+
   return {
     isAuthenticated,
     users,
@@ -93,6 +114,9 @@ export const useAuth = () => {
     deleteUser,
     updateUserPassword,
     getCurrentUser,
-    getAllUsers
+    getAllUsers,
+    isAdmin,
+    getBranchName,
+    getUserDisplayName
   }
 } 

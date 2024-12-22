@@ -2,7 +2,7 @@
     <div class="left-menu h-screen w-64 bg-gray-800 text-white fixed left-0 top-0">
         <div class="p-4 border-b border-gray-700 flex items-center gap-3">
             <Icon name="mdi:cash-register" class="text-2xl" />
-            <h2 class="text-xl font-bold">{{ restaurantName }}</h2>
+            <h2 class="text-xl font-bold">{{ currentUser?.name || currentUser?.branchName }}</h2>
         </div>
 
         <nav class="p-4">
@@ -27,8 +27,8 @@
                     <Icon name="mdi:logout" class="text-xl" />
                 </div>
                 <div>
-                    <p class="text-sm font-medium">{{ restaurantName }}</p>
-                    <p class="text-xs text-gray-400">{{ restaurantEmail }}</p>
+                    <p class="text-sm font-medium">{{ currentUser?.name || currentUser?.branchName }}</p>
+                    <p class="text-xs text-gray-400">{{ currentUser?.email }}</p>
                 </div>
             </div>
         </div>
@@ -40,63 +40,78 @@ import { useSettings } from '../composables/useSettings'
 const { restaurantName, restaurantEmail } = useSettings()
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
-const { logout } = useAuth()
+
+const currentUser = ref(null)
+
+const { logout, getCurrentUser, isAdmin, getUserDisplayName } = useAuth()
 const router = useRouter()
+currentUser.value = getCurrentUser()
 
 const handleLogout = () => {
     logout()
     router.push('/login')
 }
 
-const menuItems = [
-    {
-        id: 1,
-        title: 'Main',
-        label: 'Dashboard',
-        icon: 'mdi:view-dashboard',
-        path: '/'
-    },
-    {
-        id: 2,
-        title: 'Operations',
-        label: 'Siparişler',
-        icon: 'mdi:clipboard-list',
-        path: '/orders'
-    },
-    {
-        id: 3,
-        label: 'Yeni Sipariş',
-        icon: 'mdi:plus-circle',
-        path: '/new-order'
-    },
-    {
-        id: 4,
-        label: 'Masalar',
-        icon: 'mdi:table-furniture',
-        path: '/tables'
-    },
-    {
-        id: 5,
-        title: 'Management',
-        label: 'Müşteriler',
-        icon: 'mdi:account-group',
-        path: '/customers'
-    },
-    {
-        id: 8,
-        title: 'System',
-        label: 'Ayarlar',
-        icon: 'mdi:cog',
-        path: '/settings'
-    },
-    {
-        id: 9,
-        label: 'Kullanıcılar',
-        icon: 'mdi:account-multiple',
-        path: '/users'
+const menuItems = computed(() => {
+    const baseItems = [
+        {
+            id: 1,
+            title: 'Main',
+            label: 'Dashboard',
+            icon: 'mdi:view-dashboard',
+            path: '/'
+        },
+        {
+            id: 2,
+            title: 'Operations',
+            label: 'Siparişler',
+            icon: 'mdi:clipboard-list',
+            path: '/orders'
+        },
+        {
+            id: 3,
+            label: 'Yeni Sipariş',
+            icon: 'mdi:plus-circle',
+            path: '/new-order'
+        },
+        {
+            id: 4,
+            label: 'Masalar',
+            icon: 'mdi:table-furniture',
+            path: '/tables'
+        },
+        {
+            id: 5,
+            title: 'Management',
+            label: 'Müşteriler',
+            icon: 'mdi:account-group',
+            path: '/customers'
+        }
+    ]
+
+    // Add admin-only menu items
+    if (isAdmin()) {
+        baseItems.push(
+            {
+                id: 7,
+                title: 'System',
+                label: 'Kullanıcılar',
+                icon: 'mdi:account-cog',
+                path: '/users'
+            },
+            {
+                id: 8,
+                label: 'Ayarlar',
+                icon: 'mdi:cog',
+                path: '/settings'
+            }
+        )
     }
-]
+
+    return baseItems
+})
 </script>
 
 <style scoped>
