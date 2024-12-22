@@ -2,14 +2,66 @@
 import { ref, onMounted } from 'vue'
 import { useAuth } from '../composables/useAuth'
 
-const { getAllUsers, updateUserPassword, getCurrentUser } = useAuth()
+const { getAllUsers, updateUserPassword, getCurrentUser, addUser } = useAuth()
 const users = ref([])
 const currentUser = ref(null)
+
+// New user state
+const showAddUserModal = ref(false)
+const newUser = ref({
+  email: '',
+  password: '',
+  role: 'Kullanıcı',
+  status: 'active'
+})
+
+// Success modal state
+const showSuccessModal = ref(false)
+const successMessage = ref('')
 
 onMounted(() => {
   users.value = getAllUsers()
   currentUser.value = getCurrentUser()
 })
+
+const handleAddUser = () => {
+  if (!newUser.value.email || !newUser.value.password) {
+    error.value = 'Lütfen tüm alanları doldurun'
+    return
+  }
+
+  addUser(newUser.value)
+  users.value = getAllUsers()
+  showAddUserModal.value = false
+  showSuccessModal.value = true
+  successMessage.value = 'Kullanıcı başarıyla eklendi'
+  
+  // Reset form
+  newUser.value = {
+    email: '',
+    password: '',
+    role: 'Kullanıcı',
+    status: 'active'
+  }
+
+  setTimeout(() => {
+    showSuccessModal.value = false
+  }, 2000)
+}
+
+const handleDeleteUser = (email) => {
+  if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+    const userIndex = users.value.findIndex(u => u.email === email)
+    if (userIndex !== -1) {
+      users.value.splice(userIndex, 1)
+      showSuccessModal.value = true
+      successMessage.value = 'Kullanıcı başarıyla silindi'
+      setTimeout(() => {
+        showSuccessModal.value = false
+      }, 2000)
+    }
+  }
+}
 
 const showChangePasswordModal = ref(false)
 const oldPassword = ref('')
@@ -78,8 +130,14 @@ const getStatusClass = (status) => {
   <div class="p-6">
     <div class="mb-6 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-gray-900">Kullanıcı Yönetimi</h1>
+      <button @click="showAddUserModal = true"
+        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
+        <Icon name="mdi:account-plus" />
+        Yeni Kullanıcı
+      </button>
     </div>
 
+    <!-- Users Table -->
     <div class="bg-white rounded-lg shadow">
       <div class="p-6">
         <table class="min-w-full divide-y divide-gray-200">
@@ -111,10 +169,16 @@ const getStatusClass = (status) => {
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
-                <button @click="openChangePasswordModal(user.email)"
-                  class="text-blue-600 hover:text-blue-900 font-medium text-sm">
-                  Şifre Değiştir
-                </button>
+                <div class="flex justify-end gap-2">
+                  <button @click="openChangePasswordModal(user.email)"
+                    class="text-blue-600 hover:text-blue-900 font-medium text-sm">
+                    Şifre Değiştir
+                  </button>
+                  <button @click="handleDeleteUser(user.email)"
+                    class="text-red-600 hover:text-red-900 font-medium text-sm">
+                    Sil
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -122,7 +186,59 @@ const getStatusClass = (status) => {
       </div>
     </div>
 
-    <!-- Change Password Modal -->
+    <!-- Add User Modal -->
+    <div v-if="showAddUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-[600px] p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Yeni Kullanıcı Ekle</h3>
+          <button @click="showAddUserModal = false" class="text-gray-500 hover:text-gray-700">
+            <Icon name="mdi:close" />
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input v-model="newUser.email" type="email" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
+            <input v-model="newUser.password" type="password"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+            <select v-model="newUser.role" 
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option value="Kullanıcı">Şube</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button @click="showAddUserModal = false"
+            class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            İptal
+          </button>
+          <button @click="handleAddUser"
+            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div v-if="showSuccessModal" 
+      class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+      {{ successMessage }}
+    </div>
+
+    <!-- Existing Change Password Modal -->
     <div v-if="showChangePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg w-[600px] p-6">
         <div class="flex justify-between items-center mb-4">

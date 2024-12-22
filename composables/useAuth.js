@@ -74,6 +74,15 @@ export const useAuth = () => {
 
   const getAllUsers = () => users.value
 
+  const deleteUser = (email) => {
+    const index = users.value.findIndex(u => u.email === email)
+    if (index !== -1) {
+      users.value.splice(index, 1)
+      return true
+    }
+    return false
+  }
+
   return {
     isAuthenticated,
     users,
@@ -81,6 +90,7 @@ export const useAuth = () => {
     login,
     logout,
     addUser,
+    deleteUser,
     updateUserPassword,
     getCurrentUser,
     getAllUsers
