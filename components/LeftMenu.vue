@@ -91,6 +91,17 @@ const menuItems = computed(() => {
         }
     ]
 
+    // Add settings for non-admin users only
+    if (!isAdmin()) {
+        baseItems.push({
+            id: 8,
+            title: 'Settings',
+            label: 'Ayarlar',
+            icon: 'mdi:cog',
+            path: '/settings'
+        })
+    }
+
     // Add admin-only menu items
     if (isAdmin()) {
         baseItems.push(
@@ -100,12 +111,6 @@ const menuItems = computed(() => {
                 label: 'Kullanıcılar',
                 icon: 'mdi:account-cog',
                 path: '/users'
-            },
-            {
-                id: 8,
-                label: 'Ayarlar',
-                icon: 'mdi:cog',
-                path: '/settings'
             }
         )
     }
