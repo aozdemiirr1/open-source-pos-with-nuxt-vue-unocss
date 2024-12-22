@@ -395,7 +395,7 @@ const saveOrder = async () => {
                             </div>
                         </div>
 
-                        <div class="border-t pt-4">
+                        <div class="pt-4">
                             <div class="flex justify-between font-medium">
                                 <span>Toplam</span>
                                 <span>₺{{ cartTotal }}</span>
