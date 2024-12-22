@@ -4,77 +4,768 @@ import { useOrdersApi } from '../composables/data/axios'
 
 // Menü Kategorileri
 const menuCategories = [
-    { id: '1', name: 'Hızlı Menü' },
-    { id: '2', name: 'Yarım Ekmek' },
-    { id: '3', name: 'Tam Ekmek' },
-    { id: '4', name: 'Burgerler' },
+    { id: '1', name: 'Döner Menüler' },
+    { id: '2', name: 'Döner Çeşitleri' },
+    { id: '3', name: 'Burgerler' },
+    { id: '4', name: 'Tatlılar' },
+    { id: '5', name: 'İçecekler' },
+    { id: '6', name: 'Pizzalar' },
+    { id: '7', name: 'Kebaplar' },
+    { id: '8', name: 'Pideler' },
+    { id: '9', name: 'Yan Ürünler' }
 ]
 
 // Ürünler
 const products = [
+    // Döner Menüler
     {
         id: 1,
         categoryId: '1',
         name: 'Tavuk Döner Menü',
-        description: 'Patates + İçecek',
-        price: 120,
+        description: 'Patates + İçecek + Sos',
+        price: 150,
         hasDrinkOption: true,
         hasSauceOption: true,
-        ingredients: ['Tavuk Döner', 'Domates', 'Marul', 'Soğan']
+        ingredients: ['Tavuk Döner', 'Patates Kızartması', 'Domates', 'Marul', 'Soğan']
     },
     {
         id: 2,
         categoryId: '1',
-        name: 'Et    Döner Menü',
-        description: 'Patates + İçecek',
+        name: 'Et Döner Menü',
+        description: 'Patates + İçecek + Sos',
+        price: 180,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Patates Kızartması', 'Domates', 'Marul', 'Soğan']
+    },
+    {
+        id: 101,
+        categoryId: '1',
+        name: 'Karışık Döner Menü',
+        description: 'Patates + İçecek + Sos',
+        price: 165,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Tavuk Döner', 'Patates Kızartması', 'Domates', 'Marul']
+    },
+    {
+        id: 102,
+        categoryId: '1',
+        name: 'İskender Menü',
+        description: 'Pilav + İçecek + Sos',
+        price: 190,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Pilav', 'Domates', 'Yoğurt']
+    },
+    {
+        id: 103,
+        categoryId: '1',
+        name: 'Dürüm Menü',
+        description: 'Patates + İçecek + Sos',
+        price: 145,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Patates Kızartması', 'Domates', 'Marul']
+    },
+    {
+        id: 104,
+        categoryId: '1',
+        name: 'Porsiyon Menü',
+        description: 'Pilav + İçecek + Sos',
+        price: 170,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Pilav', 'Domates', 'Marul']
+    },
+    {
+        id: 105,
+        categoryId: '1',
+        name: 'Çocuk Menü',
+        description: 'Patates + İçecek + Sos',
         price: 120,
         hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Patates Kızartması', 'Domates']
+    },
+    {
+        id: 106,
+        categoryId: '1',
+        name: 'Aile Menü',
+        description: '4 Kişilik + İçecek + Sos',
+        price: 550,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Tavuk Döner', 'Patates Kızartması', 'Pilav']
+    },
+    {
+        id: 107,
+        categoryId: '1',
+        name: 'Öğrenci Menü',
+        description: 'Patates + İçecek + Sos',
+        price: 130,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Patates Kızartması', 'Domates']
+    },
+
+    // Döner Çeşitleri
+    {
+        id: 3,
+        categoryId: '2',
+        name: 'Yarım Ekmek Tavuk Döner',
+        description: 'Bol malzemeli',
+        price: 90,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Domates', 'Marul', 'Soğan']
+    },
+    {
+        id: 4,
+        categoryId: '2',
+        name: 'Tam Ekmek Tavuk Döner',
+        description: 'Bol malzemeli',
+        price: 160,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Domates', 'Marul', 'Soğan']
+    },
+    {
+        id: 5,
+        categoryId: '2',
+        name: 'Yarım Ekmek Et Döner',
+        description: 'Bol malzemeli',
+        price: 110,
         hasSauceOption: true,
         ingredients: ['Et Döner', 'Domates', 'Marul', 'Soğan']
     },
     {
-        id: 3,
+        id: 6,
         categoryId: '2',
-        name: 'Yarım Ekmek Döner',
+        name: 'Tam Ekmek Et Döner',
         description: 'Bol malzemeli',
-        price: 85,
+        price: 200,
         hasSauceOption: true,
-        ingredients: ['Döner', 'Domates', 'Marul', 'Soğan']
+        ingredients: ['Et Döner', 'Domates', 'Marul', 'Soğan']
     },
     {
-        id: 3,
+        id: 201,
+        categoryId: '2',
+        name: 'Dürüm Tavuk Döner',
+        description: 'Lavaş içinde',
+        price: 95,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Domates', 'Marul', 'Soğan']
+    },
+    {
+        id: 202,
+        categoryId: '2',
+        name: 'Dürüm Et Döner',
+        description: 'Lavaş içinde',
+        price: 115,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Domates', 'Marul', 'Soğan']
+    },
+    {
+        id: 203,
+        categoryId: '2',
+        name: 'Porsiyon Tavuk Döner',
+        description: 'Pilav ile',
+        price: 130,
+        hasSauceOption: true,
+        ingredients: ['Tavuk Döner', 'Pilav', 'Domates', 'Marul']
+    },
+    {
+        id: 204,
+        categoryId: '2',
+        name: 'Porsiyon Et Döner',
+        description: 'Pilav ile',
+        price: 150,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Pilav', 'Domates', 'Marul']
+    },
+    {
+        id: 205,
+        categoryId: '2',
+        name: 'İskender Porsiyon',
+        description: 'Tereyağlı',
+        price: 170,
+        hasSauceOption: true,
+        ingredients: ['Et Döner', 'Pide', 'Domates', 'Yoğurt']
+    },
+
+    // Burgerler
+    {
+        id: 7,
         categoryId: '3',
-        name: 'Tam Ekmek Döner',
-        description: 'Bol malzemeli',
-        price: 100,
+        name: 'Klasik Burger',
+        description: 'Patates + İçecek',
+        price: 160,
+        hasDrinkOption: true,
         hasSauceOption: true,
-        ingredients: ['Döner', 'Domates', 'Marul', 'Soğan']
+        ingredients: ['Dana Köfte', 'Cheddar Peyniri', 'Domates', 'Marul', 'Turşu']
     },
     {
-        id: 4,
-        categoryId: '4',
-        name: 'Burger',
-        description: 'Burger',
-        price: 100,
+        id: 8,
+        categoryId: '3',
+        name: 'Chicken Burger',
+        description: 'Patates + İçecek',
+        price: 140,
+        hasDrinkOption: true,
         hasSauceOption: true,
-        ingredients: ['Döner', 'Domates', 'Marul', 'Soğan']
+        ingredients: ['Tavuk Göğsü', 'Cheddar Peyniri', 'Domates', 'Marul', 'Turşu']
+    },
+    {
+        id: 301,
+        categoryId: '3',
+        name: 'Double Burger',
+        description: 'Patates + İçecek',
+        price: 190,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['2x Dana Köfte', '2x Cheddar Peyniri', 'Domates', 'Marul', 'Turşu']
+    },
+    {
+        id: 302,
+        categoryId: '3',
+        name: 'Cheeseburger',
+        description: 'Patates + İçecek',
+        price: 170,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Dana Köfte', '2x Cheddar Peyniri', 'Domates', 'Marul', 'Turşu']
+    },
+    {
+        id: 303,
+        categoryId: '3',
+        name: 'Mushroom Burger',
+        description: 'Patates + İçecek',
+        price: 175,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Dana Köfte', 'Mantar', 'Cheddar Peyniri', 'Domates', 'Marul']
+    },
+    {
+        id: 304,
+        categoryId: '3',
+        name: 'BBQ Burger',
+        description: 'Patates + İçecek',
+        price: 180,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Dana Köfte', 'BBQ Sos', 'Cheddar Peyniri', 'Soğan Halkası']
+    },
+    {
+        id: 305,
+        categoryId: '3',
+        name: 'Spicy Chicken Burger',
+        description: 'Patates + İçecek',
+        price: 150,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Acılı Tavuk', 'Cheddar Peyniri', 'Domates', 'Marul']
+    },
+    {
+        id: 306,
+        categoryId: '3',
+        name: 'Fish Burger',
+        description: 'Patates + İçecek',
+        price: 145,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Balık Fileto', 'Tartar Sos', 'Marul']
+    },
+    {
+        id: 307,
+        categoryId: '3',
+        name: 'Veggie Burger',
+        description: 'Patates + İçecek',
+        price: 140,
+        hasDrinkOption: true,
+        hasSauceOption: true,
+        ingredients: ['Sebze Köftesi', 'Domates', 'Marul', 'Turşu']
+    },
+
+    // Tatlılar
+    {
+        id: 9,
+        categoryId: '4',
+        name: 'Künefe',
+        description: 'Antep Fıstıklı',
+        price: 100,
+        ingredients: ['Kadayıf', 'Peynir', 'Antep Fıstığı']
+    },
+    {
+        id: 10,
+        categoryId: '4',
+        name: 'Baklava',
+        description: '4 Dilim',
+        price: 120,
+        ingredients: ['Antep Fıstığı', 'Ceviz']
+    },
+    {
+        id: 401,
+        categoryId: '4',
+        name: 'Sütlaç',
+        description: 'Fırında',
+        price: 60,
+        ingredients: ['Süt', 'Pirinç', 'Tarçın']
+    },
+    {
+        id: 402,
+        categoryId: '4',
+        name: 'Kazandibi',
+        description: 'Klasik',
+        price: 65,
+        ingredients: ['Süt', 'Un', 'Vanilya']
+    },
+    {
+        id: 403,
+        categoryId: '4',
+        name: 'Profiterol',
+        description: 'Çikolata Soslu',
+        price: 80,
+        ingredients: ['Krema', 'Çikolata Sos']
+    },
+    {
+        id: 404,
+        categoryId: '4',
+        name: 'Trileçe',
+        description: 'Karamelli',
+        price: 75,
+        ingredients: ['Süt', 'Karamel Sos']
+    },
+    {
+        id: 405,
+        categoryId: '4',
+        name: 'Dondurma',
+        description: '3 Top',
+        price: 50,
+        ingredients: ['Çikolata', 'Vanilya', 'Çilek']
+    },
+    {
+        id: 406,
+        categoryId: '4',
+        name: 'Kemalpaşa',
+        description: 'Şerbetli',
+        price: 70,
+        ingredients: ['Un', 'Şerbet']
+    },
+    {
+        id: 407,
+        categoryId: '4',
+        name: 'Kadayıf',
+        description: 'Cevizli',
+        price: 85,
+        ingredients: ['Kadayıf', 'Ceviz']
+    },
+
+    // İçecekler
+    {
+        id: 501,
+        categoryId: '5',
+        name: 'Cola',
+        description: '330ml',
+        price: 30
+    },
+    {
+        id: 502,
+        categoryId: '5',
+        name: 'Fanta',
+        description: '330ml',
+        price: 30
+    },
+    {
+        id: 503,
+        categoryId: '5',
+        name: 'Sprite',
+        description: '330ml',
+        price: 30
+    },
+    {
+        id: 504,
+        categoryId: '5',
+        name: 'Ayran',
+        description: '300ml',
+        price: 20
+    },
+    {
+        id: 505,
+        categoryId: '5',
+        name: 'Su',
+        description: '500ml',
+        price: 10
+    },
+    {
+        id: 506,
+        categoryId: '5',
+        name: 'Şalgam',
+        description: '300ml',
+        price: 25
+    },
+    {
+        id: 507,
+        categoryId: '5',
+        name: 'Ice Tea',
+        description: '330ml',
+        price: 30
+    },
+    {
+        id: 508,
+        categoryId: '5',
+        name: 'Meyve Suyu',
+        description: '330ml',
+        price: 25
+    },
+    {
+        id: 509,
+        categoryId: '5',
+        name: 'Limonata',
+        description: '300ml',
+        price: 35
+    },
+
+    // Pizzalar
+    {
+        id: 11,
+        categoryId: '6',
+        name: 'Margarita Pizza',
+        description: 'Domates sos, mozarella peyniri, fesleğen',
+        price: 140,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Fesleğen']
+    },
+    {
+        id: 12,
+        categoryId: '6',
+        name: 'Karışık Pizza',
+        description: 'Sucuk, sosis, mantar, zeytin',
+        price: 160,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Sucuk', 'Sosis', 'Mantar', 'Zeytin']
+    },
+    {
+        id: 601,
+        categoryId: '6',
+        name: 'Ton Balıklı Pizza',
+        description: 'Ton balığı, soğan, mısır',
+        price: 165,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Ton Balığı', 'Soğan', 'Mısır']
+    },
+    {
+        id: 602,
+        categoryId: '6',
+        name: 'Mantarlı Pizza',
+        description: 'Mantar, kaşar peyniri',
+        price: 145,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Mantar']
+    },
+    {
+        id: 603,
+        categoryId: '6',
+        name: 'Dört Peynirli Pizza',
+        description: 'Mozarella, rokfor, parmesan, kaşar',
+        price: 170,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Rokfor', 'Parmesan', 'Kaşar']
+    },
+    {
+        id: 604,
+        categoryId: '6',
+        name: 'Tavuklu Pizza',
+        description: 'Tavuk, mantar, mısır',
+        price: 155,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Tavuk', 'Mantar', 'Mısır']
+    },
+    {
+        id: 605,
+        categoryId: '6',
+        name: 'Vejeteryan Pizza',
+        description: 'Biber, mantar, mısır, zeytin',
+        price: 150,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Biber', 'Mantar', 'Mısır', 'Zeytin']
+    },
+    {
+        id: 606,
+        categoryId: '6',
+        name: 'Sucuklu Pizza',
+        description: 'Sucuk, biber, mantar',
+        price: 160,
+        hasDrinkOption: true,
+        ingredients: ['Domates Sos', 'Mozarella', 'Sucuk', 'Biber', 'Mantar']
+    },
+    {
+        id: 607,
+        categoryId: '6',
+        name: 'BBQ Pizza',
+        description: 'BBQ sos, tavuk, soğan',
+        price: 165,
+        hasDrinkOption: true,
+        ingredients: ['BBQ Sos', 'Mozarella', 'Tavuk', 'Soğan']
+    },
+
+    // Kebaplar
+    {
+        id: 13,
+        categoryId: '7',
+        name: 'Adana Kebap',
+        description: 'Acılı kebap, yanında bulgur pilavı',
+        price: 180,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Bulgur Pilavı', 'Közlenmiş Biber']
+    },
+    {
+        id: 14,
+        categoryId: '7',
+        name: 'Urfa Kebap',
+        description: 'Acısız kebap, yanında bulgur pilavı',
+        price: 170,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Bulgur Pilavı', 'Közlenmiş Biber']
+    },
+    {
+        id: 701,
+        categoryId: '7',
+        name: 'Beyti Kebap',
+        description: 'Lavaşa sarılı, yoğurt soslu',
+        price: 190,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Lavaş', 'Yoğurt Sos']
+    },
+    {
+        id: 702,
+        categoryId: '7',
+        name: 'Kuzu Şiş',
+        description: 'Kuzu eti, yanında pilav',
+        price: 200,
+        hasDrinkOption: true,
+        ingredients: ['Kuzu Eti', 'Pilav', 'Közlenmiş Biber']
+    },
+    {
+        id: 703,
+        categoryId: '7',
+        name: 'Tavuk Şiş',
+        description: 'Tavuk eti, yanında pilav',
+        price: 160,
+        hasDrinkOption: true,
+        ingredients: ['Tavuk Eti', 'Pilav', 'Közlenmiş Biber']
+    },
+    {
+        id: 704,
+        categoryId: '7',
+        name: 'Patlıcanlı Kebap',
+        description: 'Patlıcan, kıyma, yanında pilav',
+        price: 185,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Patlıcan', 'Pilav']
+    },
+    {
+        id: 705,
+        categoryId: '7',
+        name: 'İskender Kebap',
+        description: 'Döner, yoğurt, tereyağlı sos',
+        price: 195,
+        hasDrinkOption: true,
+        ingredients: ['Döner', 'Yoğurt', 'Tereyağlı Sos']
+    },
+    {
+        id: 706,
+        categoryId: '7',
+        name: 'Çöp Şiş',
+        description: 'Kuzu eti, yanında pilav',
+        price: 175,
+        hasDrinkOption: true,
+        ingredients: ['Kuzu Eti', 'Pilav', 'Közlenmiş Biber']
+    },
+    {
+        id: 707,
+        categoryId: '7',
+        name: 'Karışık Kebap',
+        description: 'Adana, Urfa, Şiş, yanında pilav',
+        price: 220,
+        hasDrinkOption: true,
+        ingredients: ['Adana Kebap', 'Urfa Kebap', 'Kuzu Şiş', 'Pilav']
+    },
+
+    // Pideler
+    {
+        id: 15,
+        categoryId: '8',
+        name: 'Kıymalı Pide',
+        description: 'Özel kıyma harcı ile',
+        price: 130,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Soğan', 'Maydanoz']
+    },
+    {
+        id: 16,
+        categoryId: '8',
+        name: 'Kaşarlı Pide',
+        description: 'Bol kaşarlı',
+        price: 120,
+        hasDrinkOption: true,
+        ingredients: ['Kaşar Peyniri']
+    },
+    {
+        id: 801,
+        categoryId: '8',
+        name: 'Kuşbaşılı Pide',
+        description: 'Dana kuşbaşı et ile',
+        price: 150,
+        hasDrinkOption: true,
+        ingredients: ['Kuşbaşı Et', 'Soğan', 'Biber']
+    },
+    {
+        id: 802,
+        categoryId: '8',
+        name: 'Karışık Pide',
+        description: 'Kıyma, kaşar, kuşbaşı',
+        price: 160,
+        hasDrinkOption: true,
+        ingredients: ['Kıyma', 'Kaşar', 'Kuşbaşı Et']
+    },
+    {
+        id: 803,
+        categoryId: '8',
+        name: 'Sucuklu Pide',
+        description: 'Sucuk, kaşar',
+        price: 140,
+        hasDrinkOption: true,
+        ingredients: ['Sucuk', 'Kaşar Peyniri']
+    },
+    {
+        id: 804,
+        categoryId: '8',
+        name: 'Yumurtalı Pide',
+        description: 'Yumurta, kaşar',
+        price: 125,
+        hasDrinkOption: true,
+        ingredients: ['Yumurta', 'Kaşar Peyniri']
+    },
+    {
+        id: 805,
+        categoryId: '8',
+        name: 'Pastırmalı Pide',
+        description: 'Pastırma, kaşar',
+        price: 155,
+        hasDrinkOption: true,
+        ingredients: ['Pastırma', 'Kaşar Peyniri']
+    },
+    {
+        id: 806,
+        categoryId: '8',
+        name: 'Kavurmalı Pide',
+        description: 'Et kavurma, kaşar',
+        price: 145,
+        hasDrinkOption: true,
+        ingredients: ['Kavurma', 'Kaşar Peyniri']
+    },
+    {
+        id: 807,
+        categoryId: '8',
+        name: 'Peynirli Pide',
+        description: 'Beyaz peynir, kaşar',
+        price: 130,
+        hasDrinkOption: true,
+        ingredients: ['Beyaz Peynir', 'Kaşar Peyniri']
+    },
+
+    // Yan Ürünler
+    {
+        id: 17,
+        categoryId: '9',
+        name: 'Patates Kızartması',
+        description: 'Çıtır patates',
+        price: 50,
+        hasSauceOption: true
+    },
+    {
+        id: 18,
+        categoryId: '9',
+        name: 'Soğan Halkası',
+        description: 'Çıtır soğan halkası',
+        price: 45,
+        hasSauceOption: true
+    },
+    {
+        id: 901,
+        categoryId: '9',
+        name: 'Çıtır Tavuk',
+        description: '8 parça',
+        price: 70,
+        hasSauceOption: true
+    },
+    {
+        id: 902,
+        categoryId: '9',
+        name: 'Nugget',
+        description: '10 parça',
+        price: 65,
+        hasSauceOption: true
+    },
+    {
+        id: 903,
+        categoryId: '9',
+        name: 'Mozzarella Stick',
+        description: '6 parça',
+        price: 60,
+        hasSauceOption: true
+    },
+    {
+        id: 904,
+        categoryId: '9',
+        name: 'Bulgur Pilavı',
+        description: 'Domatesli',
+        price: 40
+    },
+    {
+        id: 905,
+        categoryId: '9',
+        name: 'Pirinç Pilavı',
+        description: 'Tereyağlı',
+        price: 40
+    },
+    {
+        id: 906,
+        categoryId: '9',
+        name: 'Mercimek Çorbası',
+        description: 'Günlük',
+        price: 35
+    },
+    {
+        id: 907,
+        categoryId: '9',
+        name: 'Ezme Salata',
+        description: 'Acılı',
+        price: 35
     }
 ]
 
 // İçecekler
 const drinks = [
-    { id: 'cola', name: 'Cola', price: 10 },
-    { id: 'fanta', name: 'Fanta', price: 10 },
-    { id: 'ayran', name: 'Ayran', price: 8 },
-    { id: 'su', name: 'Su', price: 5 }
+    { id: 'cola', name: 'Cola', price: 30 },
+    { id: 'fanta', name: 'Fanta', price: 30 },
+    { id: 'sprite', name: 'Sprite', price: 30 },
+    { id: 'ayran', name: 'Ayran', price: 20 },
+    { id: 'su', name: 'Su', price: 10 },
+    { id: 'salgam', name: 'Şalgam', price: 25 },
+    { id: 'icetea-seftali', name: 'Ice Tea Şeftali', price: 30 },
+    { id: 'icetea-limon', name: 'Ice Tea Limon', price: 30 },
+    { id: 'meyvesuyu-visne', name: 'Vişne Suyu', price: 25 },
+    { id: 'meyvesuyu-seftali', name: 'Şeftali Suyu', price: 25 },
+    { id: 'gazoz', name: 'Gazoz', price: 25 },
+    { id: 'limonata', name: 'Limonata', price: 35 }
 ]
 
 // Soslar
 const sauces = [
-    { id: 'mayonez', name: 'Mayonez', price: 2 },
-    { id: 'ketcap', name: 'Ketçap', price: 2 },
-    { id: 'aci', name: 'Acı Sos', price: 2 },
-    { id: 'ranch', name: 'Ranch Sos', price: 3 }
+    { id: 'mayonez', name: 'Mayonez', price: 5 },
+    { id: 'ketcap', name: 'Ketçap', price: 5 },
+    { id: 'aci', name: 'Acı Sos', price: 5 },
+    { id: 'ranch', name: 'Ranch Sos', price: 8 },
+    { id: 'barbeku', name: 'Barbekü Sos', price: 8 }
 ]
 
 // Reactive States
@@ -338,7 +1029,6 @@ const saveOrder = async () => {
   }
 }
 </script>
-
 <template>
     <div class="h-screen flex flex-col bg-gray-100">
         <!-- Header -->
@@ -619,7 +1309,7 @@ const saveOrder = async () => {
                         </template>
                         <template v-else>
                             <p class="text-sm">
-                                <span class="font-medium">M��şteri:</span> {{ currentOrder.orderDetails.customerName }}
+                                <span class="font-medium">Müşteri:</span> {{ currentOrder.orderDetails.customerName }}
                             </p>
                             <template v-if="currentOrder.orderDetails.orderType === 'online'">
                                 <p class="text-sm">
