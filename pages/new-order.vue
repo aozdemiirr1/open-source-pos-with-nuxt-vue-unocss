@@ -847,12 +847,12 @@ const addToCart = () => {
         return
     }
 
-    if ((orderType.value === 'online' || orderType.value === 'gelal') && !customerName.value) {
+    if ((orderType.value === 'online' || orderType.value === 'gel-al') && !customerName.value) {
         alert('Lütfen müşteri adı girin')
         return
     }
 
-    if ((orderType.value === 'online' || orderType.value === 'gelal') && 
+    if ((orderType.value === 'online' || orderType.value === 'gel-al') && 
         (!customerCity.value || !customerDistrict.value || !customerNeighborhood.value || !customerStreet.value)) {
         alert('Lütfen adres bilgilerini eksiksiz girin')
         return
@@ -1058,7 +1058,7 @@ const saveOrder = async () => {
                                     <h4 class="font-medium">{{ item.name }}</h4>
                                     <p class="text-sm text-gray-600">
                                         {{ item.orderType === 'masa' ? `Masa: ${item.tableNumber}` :
-                                            item.orderType === 'gelal' ? `Müşteri: ${item.customerName}` :
+                                            item.orderType === 'gel-al' ? `Müşteri: ${item.customerName}` :
                                                 `Online - ${item.customerName}` }}
                                     </p>
                                     <p v-if="item.extras.drink" class="text-sm text-gray-600">
@@ -1158,7 +1158,7 @@ const saveOrder = async () => {
                                 class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Seçiniz</option>
                                 <option value="masa">Masa</option>
-                                <option value="gelal">Gel-Al</option>
+                                <option value="gel-al">Gel-Al</option>
                                 <option value="online">Online</option>
                             </select>
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -1183,12 +1183,17 @@ const saveOrder = async () => {
                             <input v-model="customerPhone" type="text" class="w-full p-2 border rounded-lg">
                         </div>
 
-                        <template v-if="orderType === 'gelal' || orderType === 'online'">
+                        <template v-if="orderType === 'gel-al' || orderType === 'online'">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Müşteri Adı</label>
                                 <input v-model="customerName" type="text" class="w-full p-2 border rounded-lg">
                             </div>
-                            
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefon Numarası</label>
+                                <input v-model="customerPhone" type="text" class="w-full p-2 border rounded-lg">
+                            </div>
+
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">İl</label>
                                 <input v-model="customerCity" type="text" class="w-full p-2 border rounded-lg">
@@ -1300,7 +1305,7 @@ const saveOrder = async () => {
                         <p class="text-sm">
                             <span class="font-medium">Sipariş Tipi:</span>
                             {{ currentOrder.orderDetails.orderType === 'masa' ? 'Masa' :
-                                currentOrder.orderDetails.orderType === 'gelal' ? 'Gel-Al' : 'Online' }}
+                                currentOrder.orderDetails.orderType === 'gel-al' ? 'Gel-Al' : 'Online' }}
                         </p>
                         <template v-if="currentOrder.orderDetails.orderType === 'masa'">
                             <p class="text-sm">
