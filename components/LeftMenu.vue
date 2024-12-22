@@ -89,6 +89,12 @@ const menuItems = [
         label: 'Ayarlar',
         icon: 'mdi:cog',
         path: '/settings'
+    },
+    {
+        id: 9,
+        label: 'Kullanıcılar',
+        icon: 'mdi:account-multiple',
+        path: '/users'
     }
 ]
 </script>
