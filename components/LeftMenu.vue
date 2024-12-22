@@ -2,7 +2,7 @@
     <div class="left-menu h-screen w-64 bg-gray-800 text-white fixed left-0 top-0">
         <div class="p-4 border-b border-gray-700 flex items-center gap-3">
             <Icon name="mdi:cash-register" class="text-2xl" />
-            <h2 class="text-xl font-bold">POS System</h2>
+            <h2 class="text-xl font-bold">{{ restaurantName }}</h2>
         </div>
 
         <nav class="p-4">
@@ -27,8 +27,8 @@
                     <Icon name="mdi:account" class="text-xl" />
                 </div>
                 <div>
-                    <p class="text-sm font-medium">Abdullah Özdemir</p>
-                    <p class="text-xs text-gray-400">aozdemiirr@pos.com</p>
+                    <p class="text-sm font-medium">{{ restaurantName }}</p>
+                    <p class="text-xs text-gray-400">{{ restaurantEmail }}</p>
                 </div>
             </div>
         </div>
@@ -36,6 +36,9 @@
 </template>
 
 <script setup lang="ts">
+import { useSettings } from '../composables/useSettings'
+const { restaurantName, restaurantEmail } = useSettings()
+
 const menuItems = [
     {
         id: 1,
