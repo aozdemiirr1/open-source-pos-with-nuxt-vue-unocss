@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useOrdersApi } from '../composables/data/axios'
+import { useSettings } from '../composables/useSettings'
 
 const defaultSettings = {
   restaurantName: '',
@@ -72,6 +73,8 @@ const saveSettings = async () => {
     loading.value = true
     const ordersApi = useOrdersApi()
     await ordersApi.updateSettings(settings.value)
+    const { loadSettings } = useSettings()
+    await loadSettings()
     saved.value = true
     setTimeout(() => {
       saved.value = false
