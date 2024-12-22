@@ -11,11 +11,20 @@ const users = ref([
     status: 'active'
   },
   {
-    email: 'sube@gmail.com',
+    email: 'kadikoy@gmail.com',
     password: '123456',
     role: 'Şube',
     name: 'Kadıköy Şubesi',
     branchName: 'Kadıköy Şubesi',
+    lastLogin: new Date().toLocaleString('tr-TR'),
+    status: 'active'
+  },
+  {
+    email: 'umraniye@gmail.com',
+    password: '123456',
+    role: 'Şube',
+    name: 'Ümraniye Şubesi',
+    branchName: 'Ümraniye Şubesi',
     lastLogin: new Date().toLocaleString('tr-TR'),
     status: 'active'
   }
