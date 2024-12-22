@@ -144,8 +144,11 @@ const saveSettings = async () => {
               </select>
             </div>
             <div class="flex items-center">
-              <input type="checkbox" v-model="settings.showOutOfStockItems" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-              <label class="ml-2 text-sm text-gray-700">Stokta Olmayan Ürünleri Göster</label>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="settings.showOutOfStockItems" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium text-gray-700">Stokta Olmayan Ürünleri Göster</span>
+              </label>
             </div>
           </div>
         </div>
@@ -175,18 +178,27 @@ const saveSettings = async () => {
         <!-- Payment Settings -->
         <div class="space-y-4 pt-6 border-t">
           <h3 class="text-lg font-medium text-gray-900">Ödeme Ayarları</h3>
-          <div class="space-y-2">
-            <div class="flex items-center">
-              <input type="checkbox" v-model="settings.acceptedPaymentMethods.cash" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-              <label class="ml-2 text-sm text-gray-700">Nakit Ödeme</label>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="settings.acceptedPaymentMethods.cash" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium text-gray-700">Nakit Ödeme</span>
+              </label>
             </div>
-            <div class="flex items-center">
-              <input type="checkbox" v-model="settings.acceptedPaymentMethods.creditCard" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-              <label class="ml-2 text-sm text-gray-700">Kredi Kartı</label>
+            <div class="flex items-center justify-between">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="settings.acceptedPaymentMethods.creditCard" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium text-gray-700">Kredi Kartı</span>
+              </label>
             </div>
-            <div class="flex items-center">
-              <input type="checkbox" v-model="settings.acceptedPaymentMethods.onlinePayment" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-              <label class="ml-2 text-sm text-gray-700">Online Ödeme</label>
+            <div class="flex items-center justify-between">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="settings.acceptedPaymentMethods.onlinePayment" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <span class="ml-3 text-sm font-medium text-gray-700">Online Ödeme</span>
+              </label>
             </div>
           </div>
         </div>
@@ -197,8 +209,11 @@ const saveSettings = async () => {
           <div class="space-y-3">
             <div v-for="(hours, day) in settings.businessHours" :key="day" class="grid grid-cols-3 gap-4 items-center">
               <div class="flex items-center">
-                <input type="checkbox" v-model="hours.isOpen" class="h-4 w-4 rounded border-gray-300 text-blue-600">
-                <label class="ml-2 text-sm text-gray-700 capitalize">{{ day }}</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="hours.isOpen" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <span class="ml-3 text-sm font-medium text-gray-700 capitalize">{{ day }}</span>
+                </label>
               </div>
               <input type="time" v-model="hours.open" :disabled="!hours.isOpen"
                 class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
