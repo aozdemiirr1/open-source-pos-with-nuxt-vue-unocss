@@ -22,9 +22,9 @@
         </nav>
 
         <div class="absolute bottom-0 left-0 w-full p-4 border-t border-gray-700">
-            <div class="flex items-center gap-3 py-2">
+            <div class="flex items-center gap-3 py-2 cursor-pointer" @click="handleLogout">
                 <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                    <Icon name="mdi:account" class="text-xl" />
+                    <Icon name="mdi:logout" class="text-xl" />
                 </div>
                 <div>
                     <p class="text-sm font-medium">{{ restaurantName }}</p>
@@ -38,6 +38,16 @@
 <script setup lang="ts">
 import { useSettings } from '../composables/useSettings'
 const { restaurantName, restaurantEmail } = useSettings()
+import { useAuth } from '../composables/useAuth'
+import { useRouter } from 'vue-router'
+
+const { logout } = useAuth()
+const router = useRouter()
+
+const handleLogout = () => {
+    logout()
+    router.push('/login')
+}
 
 const menuItems = [
     {
