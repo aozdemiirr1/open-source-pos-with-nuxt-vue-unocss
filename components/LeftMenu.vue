@@ -22,13 +22,13 @@
         </nav>
 
         <div class="absolute bottom-0 left-0 w-full p-4 border-t border-gray-700">
-            <div class="flex items-center gap-3 px-4 py-2">
+            <div class="flex items-center gap-3 py-2">
                 <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
                     <Icon name="mdi:account" class="text-xl" />
                 </div>
                 <div>
-                    <p class="text-sm font-medium">Admin User</p>
-                    <p class="text-xs text-gray-400">admin@pos.com</p>
+                    <p class="text-sm font-medium">Abdullah Özdemir</p>
+                    <p class="text-xs text-gray-400">aozdemiirr@pos.com</p>
                 </div>
             </div>
         </div>
