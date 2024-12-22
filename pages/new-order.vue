@@ -78,6 +78,7 @@ const sauces = [
 ]
 
 // Reactive States
+const showSuccessModal = ref(false)
 const activeCategory = ref('1')
 const selectedProduct = ref(null)
 const selectedExtras = ref({
@@ -223,14 +224,6 @@ const completeOrder = async () => {
 
     const ordersApi = useOrdersApi()
     
-    // Adres bilgilerini birleştir
-    const fullAddress = orderType.value !== 'masa' ? {
-      city: customerCity.value,
-      district: customerDistrict.value,
-      neighborhood: customerNeighborhood.value,
-      street: customerStreet.value
-    } : null
-
     // Sipariş bilgilerini hazırla
     const order = {
       id: `order-${Date.now()}`,
@@ -238,10 +231,10 @@ const completeOrder = async () => {
       type: orderType.value,
       tableNo: orderType.value === 'masa' ? tableNumber.value : null,
       phone: customerPhone.value,
-      city: fullAddress?.city,
-      district: fullAddress?.district,
-      neighborhood: fullAddress?.neighborhood,
-      street: fullAddress?.street,
+      city: customerCity.value,
+      district: customerDistrict.value,
+      neighborhood: customerNeighborhood.value,
+      street: customerStreet.value,
       total: cartTotal.value,
       status: 'pending',
       date: new Date(),
@@ -251,9 +244,14 @@ const completeOrder = async () => {
     // Siparişi kaydet
     await ordersApi.createOrder(order)
 
-    // Başarılı mesajı göster ve formu temizle
-    alert('Sipariş başarıyla oluşturuldu')
-    resetForm()
+    // Başarı modalını göster
+    showSuccessModal.value = true
+    
+    // 2 saniye sonra modalı kapat ve formu temizle
+    setTimeout(() => {
+      showSuccessModal.value = false
+      resetForm()
+    }, 2000)
     
   } catch (error) {
     console.error('Error completing order:', error)
@@ -621,7 +619,7 @@ const saveOrder = async () => {
                         </template>
                         <template v-else>
                             <p class="text-sm">
-                                <span class="font-medium">Müşteri:</span> {{ currentOrder.orderDetails.customerName }}
+                                <span class="font-medium">M��şteri:</span> {{ currentOrder.orderDetails.customerName }}
                             </p>
                             <template v-if="currentOrder.orderDetails.orderType === 'online'">
                                 <p class="text-sm">
@@ -667,5 +665,34 @@ const saveOrder = async () => {
                 </div>
             </div>
         </div>
+
+        <!-- Success Modal -->
+        <Transition
+          enter-active-class="transition duration-300 ease-out"
+          enter-from-class="transform opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition duration-200 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="transform opacity-0"
+        >
+          <div v-if="showSuccessModal" class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black opacity-30"></div>
+            <div class="bg-white rounded-lg p-6 shadow-xl z-10 transform transition-all">
+              <div class="flex items-center justify-center mb-4">
+                <div class="bg-green-100 rounded-full p-3">
+                  <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="text-lg font-medium text-center text-gray-900 mb-2">
+                Sipariş Başarıyla Oluşturuldu
+              </h3>
+              <p class="text-sm text-gray-500 text-center">
+                Sipariş detaylarını siparişler sayfasından görüntüleyebilirsiniz.
+              </p>
+            </div>
+          </div>
+        </Transition>
     </div>
 </template>

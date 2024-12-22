@@ -138,14 +138,16 @@ const mockOrders = [
 const mockCustomers = []
 
 // Mock tables data
-const mockTables = [
-  { id: 1, number: '1', status: 'empty', currentOrder: null },
-  { id: 2, number: '2', status: 'empty', currentOrder: null },
-  { id: 3, number: '3', status: 'empty', currentOrder: null },
-  { id: 4, number: '4', status: 'empty', currentOrder: null },
-  { id: 5, number: '5', status: 'empty', currentOrder: null },
-  { id: 6, number: '6', status: 'empty', currentOrder: null }
-]
+let mockTables = Array.from({ length: 20 }, (_, i) => ({
+  id: i + 1,
+  number: String(i + 1),
+  status: 'empty',
+  currentOrder: null,
+  customerName: null,
+  customerPhone: null,
+  orderTotal: null,
+  orderDate: null
+}))
 
 // Setup mock endpoints
 mock.onGet('/orders').reply(200, mockOrders)
@@ -202,7 +204,9 @@ mock.onPost('/orders').reply((config) => {
 
   // Masa siparişi ise tables listesini güncelle
   if (newOrder.type === 'masa') {
-    const table = mockTables.find(t => t.number === newOrder.tableNo)
+    const tableNumber = String(newOrder.tableNo)
+    const table = mockTables.find(t => t.number === tableNumber)
+    
     if (table) {
       table.status = 'occupied'
       table.currentOrder = newOrder.id
@@ -210,14 +214,32 @@ mock.onPost('/orders').reply((config) => {
       table.customerPhone = newOrder.phone
       table.orderTotal = newOrder.total
       table.orderDate = newOrder.date
+    } else {
+      // Eğer masa yoksa yeni oluştur
+      mockTables.push({
+        id: mockTables.length + 1,
+        number: tableNumber,
+        status: 'occupied',
+        currentOrder: newOrder.id,
+        customerName: newOrder.customer,
+        customerPhone: newOrder.phone,
+        orderTotal: newOrder.total,
+        orderDate: newOrder.date
+      })
     }
   }
 
   return [200, newOrder]
 })
 
-// Tables endpoint'lerini ekleyelim
-mock.onGet('/tables').reply(() => [200, mockTables])
+// Tables endpoint'lerini güncelleyelim
+mock.onGet('/tables').reply(() => {
+  // Masa numaralarına göre sırala
+  const sortedTables = [...mockTables].sort((a, b) => 
+    Number(a.number) - Number(b.number)
+  )
+  return [200, sortedTables]
+})
 
 mock.onPut('/tables/:number').reply((config) => {
   const tableNumber = config.url.split('/').pop()
@@ -240,7 +262,9 @@ export const useOrdersApi = () => {
     createCustomer: (customer) => axios.post('/customers', customer),
     updateCustomer: (customer) => axios.put(`/customers/${customer.id}`, customer),
     deleteCustomer: (id) => axios.delete(`/customers/${id}`),
-    createOrder: (order) => axios.post('/orders', order)
+    createOrder: (order) => axios.post('/orders', order),
+    getTables: () => axios.get('/tables'),
+    updateTable: (number, table) => axios.put(`/tables/${number}`, table)
   }
 }
 

@@ -1,12 +1,14 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import axios from '../composables/data/axios'
+import { useOrdersApi } from '../composables/data/axios'
 
 const activeStatus = ref('all')
 const selectedTable = ref(null)
 const searchQuery = ref('')
 const tables = ref([])
 const orders = ref([])
+const ordersApi = useOrdersApi()
 
 const tableStatuses = [
     { id: 'all', label: 'Tümü', icon: 'mdi:table-furniture' },
@@ -49,7 +51,7 @@ const updateTables = () => {
                 status: 'active',
                 customer: tableOrder.customer,
                 startTime: tableOrder.date,
-                items: tableOrder.items,
+                items: tableOrder.items || [],
                 total: tableOrder.total
             }
         }
@@ -161,6 +163,32 @@ const printTableReceipt = (table) => {
     printWindow.document.close()
     printWindow.print()
 }
+
+const fetchTables = async () => {
+    try {
+        const [ordersResponse, tablesResponse] = await Promise.all([
+            axios.get('/orders'),
+            ordersApi.getTables()
+        ])
+        
+        orders.value = ordersResponse.data
+        tables.value = tablesResponse.data.map(table => ({
+            ...table,
+            items: table.items || []
+        }))
+    } catch (error) {
+        console.error('Error fetching data:', error)
+    }
+}
+
+onMounted(() => {
+    fetchTables()
+    const interval = setInterval(fetchTables, 5000)
+    
+    onUnmounted(() => {
+        clearInterval(interval)
+    })
+})
 </script>
 
 <template>
