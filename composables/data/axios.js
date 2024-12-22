@@ -264,7 +264,74 @@ export const useOrdersApi = () => {
     deleteCustomer: (id) => axios.delete(`/customers/${id}`),
     createOrder: (order) => axios.post('/orders', order),
     getTables: () => axios.get('/tables'),
-    updateTable: (number, table) => axios.put(`/tables/${number}`, table)
+    updateTable: (number, table) => axios.put(`/tables/${number}`, table),
+    getSettings: async () => {
+      try {
+        // Get settings from localStorage
+        const savedSettings = localStorage.getItem('restaurantSettings')
+        if (savedSettings) {
+          return { data: JSON.parse(savedSettings) }
+        }
+
+        // If no settings exist, return default settings
+        const defaultSettings = {
+          restaurantName: '',
+          address: '',
+          phone: '',
+          email: '',
+          taxRate: 0,
+          currency: 'TRY',
+          language: 'tr',
+          orderPrefix: '#',
+          tableCount: 12,
+          defaultMenuCategory: '1',
+          showOutOfStockItems: false,
+          allowSpecialRequests: true,
+          autoConfirmOrders: false,
+          orderNumberPrefix: 'SIP',
+          minimumOrderAmount: 0,
+          deliveryFee: 0,
+          freeDeliveryThreshold: 0,
+          acceptedPaymentMethods: {
+            cash: true,
+            creditCard: true,
+            onlinePayment: false
+          },
+          printerEnabled: false,
+          printerName: '',
+          autoPrintReceipts: true,
+          receiptFooterText: '',
+          notifyNewOrders: true,
+          notifyLowStock: true,
+          notificationSound: true,
+          businessHours: {
+            monday: { open: '09:00', close: '22:00', isOpen: true },
+            tuesday: { open: '09:00', close: '22:00', isOpen: true },
+            wednesday: { open: '09:00', close: '22:00', isOpen: true },
+            thursday: { open: '09:00', close: '22:00', isOpen: true },
+            friday: { open: '09:00', close: '22:00', isOpen: true },
+            saturday: { open: '09:00', close: '22:00', isOpen: true },
+            sunday: { open: '09:00', close: '22:00', isOpen: true }
+          }
+        }
+        
+        // Save default settings
+        localStorage.setItem('restaurantSettings', JSON.stringify(defaultSettings))
+        return { data: defaultSettings }
+      } catch (error) {
+        console.error('Error in getSettings:', error)
+        throw error
+      }
+    },
+    updateSettings: async (settings) => {
+      try {
+        localStorage.setItem('restaurantSettings', JSON.stringify(settings))
+        return { data: settings }
+      } catch (error) {
+        console.error('Error in updateSettings:', error)
+        throw error
+      }
+    }
   }
 }
 

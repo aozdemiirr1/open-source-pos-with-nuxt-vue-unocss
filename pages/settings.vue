@@ -1,187 +1,220 @@
-<script setup lang="ts">
-import { ref } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useOrdersApi } from '../composables/data/axios'
 
-const settings = ref({
-    companyInfo: {
-        name: 'Restoran Adı',
-        address: 'Restoran Adresi',
-        phone: '0212 123 45 67',
-        email: 'info@restoran.com',
-        taxNumber: '1234567890'
-    },
-    printSettings: {
-        showLogo: true,
-        showAddress: true,
-        showPhone: true,
-        showEmail: true,
-        showTaxNumber: true,
-        footerText: 'Bizi tercih ettiğiniz için teşekkür ederiz!'
-    },
-    tableSettings: {
-        totalTables: 12,
-        defaultServiceTime: 60 // dakika
-    },
-    orderSettings: {
-        allowOnlineOrders: true,
-        minOrderAmount: 50,
-        deliveryFee: 15,
-        maxDeliveryDistance: 5 // km
-    }
+const defaultSettings = {
+  restaurantName: '',
+  address: '',
+  phone: '',
+  email: '',
+  taxRate: 0,
+  currency: 'TRY',
+  language: 'tr',
+  orderPrefix: '#',
+  tableCount: 12,
+  defaultMenuCategory: '1',
+  showOutOfStockItems: false,
+  allowSpecialRequests: true,
+  autoConfirmOrders: false,
+  orderNumberPrefix: 'SIP',
+  minimumOrderAmount: 0,
+  deliveryFee: 0,
+  freeDeliveryThreshold: 0,
+  acceptedPaymentMethods: {
+    cash: true,
+    creditCard: true,
+    onlinePayment: false
+  },
+  printerEnabled: false,
+  printerName: '',
+  autoPrintReceipts: true,
+  receiptFooterText: '',
+  notifyNewOrders: true,
+  notifyLowStock: true,
+  notificationSound: true,
+  businessHours: {
+    monday: { open: '09:00', close: '22:00', isOpen: true },
+    tuesday: { open: '09:00', close: '22:00', isOpen: true },
+    wednesday: { open: '09:00', close: '22:00', isOpen: true },
+    thursday: { open: '09:00', close: '22:00', isOpen: true },
+    friday: { open: '09:00', close: '22:00', isOpen: true },
+    saturday: { open: '09:00', close: '22:00', isOpen: true },
+    sunday: { open: '09:00', close: '22:00', isOpen: true }
+  }
+}
+
+const settings = ref({ ...defaultSettings })
+
+const loading = ref(false)
+const saved = ref(false)
+
+onMounted(async () => {
+  await loadSettings()
 })
 
-const saveSettings = () => {
-    // Ayarları kaydet
-    console.log('Ayarlar kaydedildi:', settings.value)
+const loadSettings = async () => {
+  try {
+    loading.value = true
+    const ordersApi = useOrdersApi()
+    const response = await ordersApi.getSettings()
+    if (response?.data) {
+      settings.value = { ...defaultSettings, ...response.data }
+    }
+  } catch (error) {
+    console.error('Error loading settings:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const saveSettings = async () => {
+  try {
+    loading.value = true
+    const ordersApi = useOrdersApi()
+    await ordersApi.updateSettings(settings.value)
+    saved.value = true
+    setTimeout(() => {
+      saved.value = false
+    }, 2000)
+  } catch (error) {
+    console.error('Error saving settings:', error)
+    alert('Ayarlar kaydedilirken bir hata oluştu')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
 <template>
-    <div class="p-6 bg-gray-100 min-h-screen">
-        <!-- Header -->
-        <div class="flex justify-between items-center">
-            <div class="mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Ayarlar</h1>
-                <p class="text-gray-600">Sistem ayarlarını yönetin</p>
+  <div class="p-6 bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Ayarlar</h1>
+        <p class="text-gray-600">Sistem ayarlarını yönetin</p>
+      </div>
+      <button @click="saveSettings" :disabled="loading"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50">
+        {{ loading ? 'Ayarlar Kaydediliyor...' : 'Ayarları Kaydet' }}
+      </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6 space-y-6">
+        <!-- Restaurant Info -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Restoran Bilgileri</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Restoran Adı</label>
+              <input v-model="settings.restaurantName" type="text" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div>
-                <button @click="saveSettings"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 flex items-center gap-2">
-                    <Icon name="mdi:content-save" />
-                    Ayarları Kaydet
-                </button>
+              <label class="block text-sm font-medium text-gray-700">Telefon</label>
+              <input v-model="settings.phone" type="text" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">E-posta</label>
+              <input v-model="settings.email" type="email" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Adres</label>
+              <textarea v-model="settings.address" rows="2" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+            </div>
+          </div>
         </div>
 
-        <div class="space-y-6">
-            <!-- İşletme Bilgileri -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold mb-4">İşletme Bilgileri</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">İşletme Adı</label>
-                        <input v-model="settings.companyInfo.name" type="text"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                        <input v-model="settings.companyInfo.phone" type="text"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-                        <input v-model="settings.companyInfo.email" type="email"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Vergi No</label>
-                        <input v-model="settings.companyInfo.taxNumber" type="text"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Adres</label>
-                        <textarea v-model="settings.companyInfo.address"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" rows="2"></textarea>
-                    </div>
-                </div>
+        <!-- Menu Settings -->
+        <div class="space-y-4 pt-6 border-t">
+          <h3 class="text-lg font-medium text-gray-900">Menü Ayarları</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Varsayılan Kategori</label>
+              <select v-model="settings.defaultMenuCategory" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="1">Döner Menüler</option>
+                <option value="2">Döner Çeşitleri</option>
+                <option value="3">Burgerler</option>
+                <option value="4">Tatlılar</option>
+                <option value="5">İçecekler</option>
+              </select>
             </div>
-
-            <!-- Yazıcı Ayarları -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold mb-4">Fiş Yazdırma Ayarları</h2>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.printSettings.showLogo" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">Logo Göster</span>
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.printSettings.showAddress" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">Adres Göster</span>
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.printSettings.showPhone" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">Telefon Göster</span>
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.printSettings.showEmail" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">E-posta Göster</span>
-                        </label>
-                    </div>
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.printSettings.showTaxNumber" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">Vergi No Göster</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fiş Alt Metni</label>
-                        <input v-model="settings.printSettings.footerText" type="text"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                </div>
+            <div class="flex items-center">
+              <input type="checkbox" v-model="settings.showOutOfStockItems" class="h-4 w-4 rounded border-gray-300 text-blue-600">
+              <label class="ml-2 text-sm text-gray-700">Stokta Olmayan Ürünleri Göster</label>
             </div>
-
-            <!-- Masa Ayarları -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold mb-4">Masa Ayarları</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Toplam Masa Sayısı</label>
-                        <input v-model="settings.tableSettings.totalTables" type="number"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Varsayılan Servis Süresi
-                            (dk)</label>
-                        <input v-model="settings.tableSettings.defaultServiceTime" type="number"
-                            class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sipariş Ayarları -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold mb-4">Sipariş Ayarları</h2>
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" v-model="settings.orderSettings.allowOnlineOrders" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                            <span class="ml-2 text-sm text-gray-700">Online Siparişleri Kabul Et</span>
-                        </label>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Sipariş Tutarı
-                                (₺)</label>
-                            <input v-model="settings.orderSettings.minOrderAmount" type="number"
-                                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Teslimat Ücreti (₺)</label>
-                            <input v-model="settings.orderSettings.deliveryFee" type="number"
-                                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Maksimum Teslimat Mesafesi
-                                (km)</label>
-                            <input v-model="settings.orderSettings.maxDeliveryDistance" type="number"
-                                class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <!-- Order Settings -->
+        <div class="space-y-4 pt-6 border-t">
+          <h3 class="text-lg font-medium text-gray-900">Sipariş Ayarları</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Minimum Sipariş Tutarı</label>
+              <input v-model.number="settings.minimumOrderAmount" type="number" min="0" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Teslimat Ücreti</label>
+              <input v-model.number="settings.deliveryFee" type="number" min="0" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Ücretsiz Teslimat Limiti</label>
+              <input v-model.number="settings.freeDeliveryThreshold" type="number" min="0" 
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Settings -->
+        <div class="space-y-4 pt-6 border-t">
+          <h3 class="text-lg font-medium text-gray-900">Ödeme Ayarları</h3>
+          <div class="space-y-2">
+            <div class="flex items-center">
+              <input type="checkbox" v-model="settings.acceptedPaymentMethods.cash" class="h-4 w-4 rounded border-gray-300 text-blue-600">
+              <label class="ml-2 text-sm text-gray-700">Nakit Ödeme</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" v-model="settings.acceptedPaymentMethods.creditCard" class="h-4 w-4 rounded border-gray-300 text-blue-600">
+              <label class="ml-2 text-sm text-gray-700">Kredi Kartı</label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" v-model="settings.acceptedPaymentMethods.onlinePayment" class="h-4 w-4 rounded border-gray-300 text-blue-600">
+              <label class="ml-2 text-sm text-gray-700">Online Ödeme</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business Hours -->
+        <div class="space-y-4 pt-6 border-t">
+          <h3 class="text-lg font-medium text-gray-900">Çalışma Saatleri</h3>
+          <div class="space-y-3">
+            <div v-for="(hours, day) in settings.businessHours" :key="day" class="grid grid-cols-3 gap-4 items-center">
+              <div class="flex items-center">
+                <input type="checkbox" v-model="hours.isOpen" class="h-4 w-4 rounded border-gray-300 text-blue-600">
+                <label class="ml-2 text-sm text-gray-700 capitalize">{{ day }}</label>
+              </div>
+              <input type="time" v-model="hours.open" :disabled="!hours.isOpen"
+                class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+              <input type="time" v-model="hours.close" :disabled="!hours.isOpen"
+                class="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <!-- Success Message -->
+    <div v-if="saved" 
+      class="fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg">
+      Ayarlar başarıyla kaydedildi!
+    </div>
+  </div>
 </template>
