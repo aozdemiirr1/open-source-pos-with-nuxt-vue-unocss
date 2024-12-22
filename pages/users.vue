@@ -6,35 +6,56 @@ const { getAllUsers, updateUserPassword, getCurrentUser, addUser } = useAuth()
 const users = ref([])
 const currentUser = ref(null)
 
-// New user state
+// Modal states
 const showAddUserModal = ref(false)
+const showChangePasswordModal = ref(false)
+const showConfirmDeleteModal = ref(false)
+const showMessageModal = ref(false)
+
 const newUser = ref({
   email: '',
   password: '',
-  role: 'Şube',
+  role: 'Şube', 
   status: 'active'
 })
 
-// Success modal state
-const showSuccessModal = ref(false)
-const successMessage = ref('')
+const messageModal = ref({
+  message: '',
+  type: 'success' // success or error
+})
+
+const oldPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const error = ref('')
+const success = ref('')
+const selectedUserEmail = ref('')
+const userToDelete = ref('')
 
 onMounted(() => {
   users.value = getAllUsers()
   currentUser.value = getCurrentUser()
 })
 
+const showMessage = (message, type = 'success') => {
+  messageModal.value.message = message
+  messageModal.value.type = type
+  showMessageModal.value = true
+  setTimeout(() => {
+    showMessageModal.value = false
+  }, 2000)
+}
+
 const handleAddUser = () => {
   if (!newUser.value.email || !newUser.value.password) {
-    error.value = 'Lütfen tüm alanları doldurun'
+    showMessage('Lütfen tüm alanları doldurun', 'error')
     return
   }
 
   addUser(newUser.value)
   users.value = getAllUsers()
   showAddUserModal.value = false
-  showSuccessModal.value = true
-  successMessage.value = 'Kullanıcı başarıyla eklendi'
+  showMessage('Kullanıcı başarıyla eklendi')
   
   // Reset form
   newUser.value = {
@@ -43,50 +64,38 @@ const handleAddUser = () => {
     role: 'Şube',
     status: 'active'
   }
-
-  setTimeout(() => {
-    showSuccessModal.value = false
-  }, 2000)
 }
 
-const handleDeleteUser = (email) => {
-  if (confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
-    const userIndex = users.value.findIndex(u => u.email === email)
-    if (userIndex !== -1) {
-      users.value.splice(userIndex, 1)
-      showSuccessModal.value = true
-      successMessage.value = 'Kullanıcı başarıyla silindi'
-      setTimeout(() => {
-        showSuccessModal.value = false
-      }, 2000)
-    }
+const confirmDelete = (email) => {
+  userToDelete.value = email
+  showConfirmDeleteModal.value = true
+}
+
+const handleDeleteUser = () => {
+  const userIndex = users.value.findIndex(u => u.email === userToDelete.value)
+  if (userIndex !== -1) {
+    users.value.splice(userIndex, 1)
+    showConfirmDeleteModal.value = false
+    showMessage('Kullanıcı başarıyla silindi')
   }
 }
-
-const showChangePasswordModal = ref(false)
-const oldPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-const error = ref('')
-const success = ref('')
-const selectedUserEmail = ref('')
 
 const handleChangePassword = () => {
   error.value = ''
   success.value = ''
 
   if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
-    error.value = 'Lütfen tüm alanları doldurun'
+    showMessage('Lütfen tüm alanları doldurun', 'error')
     return
   }
 
   if (newPassword.value !== confirmPassword.value) {
-    error.value = 'Yeni şifreler eşleşmiyor'
+    showMessage('Yeni şifreler eşleşmiyor', 'error')
     return
   }
 
   if (updateUserPassword(selectedUserEmail.value, newPassword.value)) {
-    success.value = 'Şifre başarıyla değiştirildi'
+    showMessage('Şifre başarıyla değiştirildi')
     setTimeout(() => {
       showChangePasswordModal.value = false
       oldPassword.value = ''
@@ -94,7 +103,7 @@ const handleChangePassword = () => {
       confirmPassword.value = ''
     }, 1500)
   } else {
-    error.value = 'Şifre değiştirilemedi'
+    showMessage('Şifre değiştirilemedi', 'error')
   }
 }
 
@@ -174,7 +183,7 @@ const getStatusClass = (status) => {
                     class="w-8 h-8 text-blue-500 bg-blue-100 rounded hover:bg-blue-200">
                     <Icon name="mdi:key" />
                   </button>
-                  <button @click="handleDeleteUser(user.email)" 
+                  <button @click="confirmDelete(user.email)" 
                     class="w-8 h-8 text-red-500 bg-red-100 rounded hover:bg-red-200">
                     <Icon name="mdi:delete" />
                   </button>
@@ -232,13 +241,34 @@ const getStatusClass = (status) => {
       </div>
     </div>
 
-    <!-- Success Modal -->
-    <div v-if="showSuccessModal" 
-      class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-      {{ successMessage }}
+    <!-- Message Modal -->
+    <div v-if="showMessageModal" class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-[400px]">
+        <div :class="messageModal.type === 'success' ? 'text-green-600' : 'text-red-600'" class="text-center text-lg font-medium">
+          {{ messageModal.message }}
+        </div>
+      </div>
     </div>
 
-    <!-- Existing Change Password Modal -->
+    <!-- Confirm Delete Modal -->
+    <div v-if="showConfirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg w-[400px] p-6">
+        <h3 class="text-xl font-semibold mb-4">Kullanıcıyı Sil</h3>
+        <p class="text-gray-600 mb-6">Bu kullanıcıyı silmek istediğinize emin misiniz?</p>
+        <div class="flex justify-end gap-3">
+          <button @click="showConfirmDeleteModal = false"
+            class="px-4 py-2 text-gray-600 hover:text-gray-800">
+            İptal
+          </button>
+          <button @click="handleDeleteUser"
+            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+            Sil
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
     <div v-if="showChangePasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg w-[600px] p-6">
         <div class="flex justify-between items-center mb-4">
@@ -266,9 +296,6 @@ const getStatusClass = (status) => {
             <input type="password" v-model="confirmPassword"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg" />
           </div>
-
-          <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
-          <div v-if="success" class="text-green-500 text-sm">{{ success }}</div>
         </div>
 
         <div class="mt-6 flex justify-end gap-3">
