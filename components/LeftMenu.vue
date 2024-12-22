@@ -2,7 +2,7 @@
     <div class="left-menu h-screen w-64 bg-gray-800 text-white fixed left-0 top-0">
         <div class="p-4 border-b border-gray-700 flex items-center gap-3">
             <Icon name="mdi:cash-register" class="text-2xl" />
-            <h2 class="text-xl font-bold">{{ currentUser?.name || currentUser?.branchName }}</h2>
+            <h2 class="text-xl font-bold">{{ getUserDisplayName() }}</h2>
         </div>
 
         <nav class="p-4">
@@ -27,8 +27,8 @@
                     <Icon name="mdi:logout" class="text-xl" />
                 </div>
                 <div>
-                    <p class="text-sm font-medium">{{ currentUser?.name || currentUser?.branchName }}</p>
-                    <p class="text-xs text-gray-400">{{ currentUser?.email }}</p>
+                    <p class="text-sm font-medium">{{ getUserDisplayName() }}</p>
+                    <p class="text-xs text-gray-400">{{ getCurrentUser()?.email }}</p>
                 </div>
             </div>
         </div>
@@ -36,8 +36,6 @@
 </template>
 
 <script setup lang="ts">
-import { useSettings } from '../composables/useSettings'
-const { restaurantName, restaurantEmail } = useSettings()
 import { useAuth } from '../composables/useAuth'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
