@@ -32,8 +32,8 @@ const handleLogin = async () => {
   }
 }
 
-const goToBranchLogin = () => {
-  router.push('/branch-login')
+const goToLogin = () => {
+  router.push('/login')
 }
 </script>
 
@@ -43,11 +43,11 @@ const goToBranchLogin = () => {
       <div>
         <div class="flex justify-center">
           <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <Icon name="mdi:cash-register" class="text-4xl text-white" />
+            <Icon name="mdi:store" class="text-4xl text-white" />
           </div>
         </div>
         <h2 class="mt-8 text-center text-3xl font-extrabold text-gray-900">
-          Admin Paneli
+          Şube Paneli
         </h2>
         <p class="mt-3 text-center text-sm text-gray-600">
           Lütfen hesabınıza giriş yapın
@@ -93,10 +93,10 @@ const goToBranchLogin = () => {
             </span>
             {{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
           </button>
-          <button @click="goToBranchLogin"
+          <button @click="goToLogin"
             class="w-full mt-5 flex justify-center items-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <Icon name="mdi:store" class="text-xl" />
-            Şube Girişi için Tıklayın
+            <Icon name="mdi:cash-register" class="text-xl" />
+            Admin Girişi için Tıklayın
           </button>
         </div>
       </form>
