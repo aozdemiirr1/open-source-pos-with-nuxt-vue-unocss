@@ -14,9 +14,16 @@ const handleLogin = async () => {
   try {
     loading.value = true
     error.value = ''
-    
+
     if (!email.value || !password.value) {
       error.value = 'Lütfen tüm alanları doldurun'
+      return
+    }
+
+    // Only allow admin login
+    const isAdminEmail = email.value === 'admin@gmail.com'
+    if (!isAdminEmail) {
+      error.value = 'Bu giriş paneli sadece admin girişi içindir.'
       return
     }
 
@@ -38,7 +45,8 @@ const goToBranchLogin = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div
+    class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white/95 backdrop-blur-sm p-10 rounded-2xl shadow-2xl">
       <div>
         <div class="flex justify-center">
@@ -50,10 +58,10 @@ const goToBranchLogin = () => {
           Admin Paneli
         </h2>
         <p class="mt-3 text-center text-sm text-gray-600">
-          Lütfen hesabınıza giriş yapın
+          Lütfen admin hesabınıza giriş yapın
         </p>
       </div>
-      
+
       <form class="mt-10 space-y-6" @submit.prevent="handleLogin">
         <div class="space-y-5">
           <div class="relative">
@@ -64,10 +72,10 @@ const goToBranchLogin = () => {
               </div>
               <input v-model="email" id="email" name="email" type="email" required
                 class="pl-10 appearance-none rounded-lg block w-full px-3 py-3 border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"
-                placeholder="Email adresinizi girin">
+                placeholder="Admin email adresinizi girin">
             </div>
           </div>
-          
+
           <div class="relative">
             <label for="password" class="text-sm font-medium text-gray-700 mb-1 block">Şifre</label>
             <div class="relative">
@@ -94,9 +102,11 @@ const goToBranchLogin = () => {
             {{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
           </button>
           <button @click="goToBranchLogin"
-            class="w-full mt-5 flex justify-center items-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <Icon name="mdi:store" class="text-xl" />
-            Şube Girişi için Tıklayın
+            class="mt-5 group relative w-full flex justify-center py-3 px-4 border border-gray-200 text-sm font-medium rounded-lg text-dark !bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition duration-150 ease-in-out shadow-lg hover:shadow-xl">
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <Icon name="mdi:login" class="h-5 w-5 text-dark" />
+            </span>
+            Şube Girişi İçin Tıklayın
           </button>
         </div>
       </form>

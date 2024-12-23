@@ -20,6 +20,13 @@ const handleLogin = async () => {
       return
     }
 
+    // Only allow branch login
+    const isBranchEmail = email.value === 'kadikoy@gmail.com' || email.value === 'umraniye@gmail.com'
+    if (!isBranchEmail) {
+      error.value = 'Bu giriş paneli sadece şube girişi içindir.'
+      return
+    }
+
     if (login(email.value, password.value)) {
       router.push('/')
     } else {
@@ -94,8 +101,10 @@ const goToLogin = () => {
             {{ loading ? 'Giriş yapılıyor...' : 'Giriş Yap' }}
           </button>
           <button @click="goToLogin"
-            class="w-full mt-5 flex justify-center items-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <Icon name="mdi:cash-register" class="text-xl" />
+            class="mt-5 group relative w-full flex justify-center py-3 px-4 border border-gray-200 text-sm font-medium rounded-lg text-dark !bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition duration-150 ease-in-out shadow-lg hover:shadow-xl">
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <Icon name="mdi:login" class="h-5 w-5 text-dark" />
+            </span>
             Admin Girişi için Tıklayın
           </button>
         </div>
