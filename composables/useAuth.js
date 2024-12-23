@@ -3,7 +3,7 @@ import { ref } from 'vue'
 const isAuthenticated = ref(false)
 const users = ref([
   {
-    email: 'aozdemiirr05@gmail.com',
+    email: 'admin@gmail.com',
     password: '123456',
     role: 'Admin',
     name: 'Abdullah Özdemir',
