@@ -2,22 +2,16 @@
 import Aura from "@primevue/themes/aura";
 
 export default defineNuxtConfig({
-  ssr: false,
+  compatibilityDate: '2024-11-01',
+  devtools: { enabled: true },
   modules: [
     '@unocss/nuxt',
     '@nuxt/icon',
     '@primevue/nuxt-module'
   ],
-  app: {
-    head: {
-      title: 'POS Sistemi'
-    }
+  primevue: {
+   
   },
-  imports: {
-    dirs: ['composables', 'composables/data']
-  },
-  build: {
-    transpile: ['axios']
-  },
-  devtools: { enabled: true }
+  css: [
+  ]
 })
